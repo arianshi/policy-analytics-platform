@@ -1,0 +1,1155 @@
+year,industry,retrench
+1998,manufacturing,20700
+1998,"food, beverages and tobacco",230
+1998,textile and wearing apparel,310
+1998,paper products and publishing,510
+1998,petroleum and chemical products,500
+1998,rubber and plastic products,1100
+1998,fabricated metal products,1080
+1998,machinery and equipment,1840
+1998,electrical products,1520
+1998,electronic products,11340
+1998,medical and precision instruments,270
+1998,transport equipment,240
+1998,other manufacturing industries,1760
+1998,construction,2450
+1998,services,9630
+1998,wholesale and retail trade,3990
+1998,wholesale trade,3310
+1998,retail trade,680
+1998,hotels and restaurants,1400
+1998,hotels,980
+1998,restaurants,430
+1998,"transport, storage and communications",820
+1998,financial intermediation,1480
+1998,financial institutions,1430
+1998,insurance and pension funding,50
+1998,business and real estate services,1590
+1998,"community, social and personal services",340
+1998,others,30
+1999,manufacturing,8370
+1999,"food, beverages and tobacco",450
+1999,textile and wearing apparel,30
+1999,paper products and publishing,150
+1999,petroleum and chemical products,310
+1999,rubber and plastic products,300
+1999,fabricated metal products,270
+1999,machinery and equipment,490
+1999,electrical products,330
+1999,electronic products,5200
+1999,medical and precision instruments,90
+1999,transport equipment,600
+1999,other manufacturing industries,160
+1999,construction,830
+1999,services,6320
+1999,wholesale and retail trade,2310
+1999,wholesale trade,1510
+1999,retail trade,800
+1999,hotels and restaurants,550
+1999,hotels,460
+1999,restaurants,90
+1999,"transport, storage and communications",580
+1999,financial intermediation,1580
+1999,financial institutions,1550
+1999,insurance and pension funding,30
+1999,business and real estate services,1080
+1999,"community, social and personal services",210
+1999,others,10
+2000,manufacturing,7500
+2000,"food, beverages and tobacco",90
+2000,paper products and printing,10
+2000,"petroleum, chemical and pharmaceutical products",200
+2000,rubber and plastic products,70
+2000,fabricated metal products,290
+2000,machinery and equipment,310
+2000,electrical products,70
+2000,electronic products,5990
+2000,medical and precision instruments,10
+2000,transport equipment,210
+2000,other manufacturing industries,260
+2000,construction,380
+2000,services producing industries,4080
+2000,wholesale and retail trade,1010
+2000,wholesale trade,880
+2000,retail trade,120
+2000,transport and storage,640
+2000,land transport and supporting services,10
+2000,water transport and supporting services,170
+2000,air transport and supporting services,20
+2000,other transport and storage services,440
+2000,hotels and restaurants,440
+2000,hotels,260
+2000,restaurants,180
+2000,information and communications,410
+2000,broadcasting and publishing,300
+2000,telecommunications,30
+2000,it and other information services,90
+2000,financial services,920
+2000,financial institutions,880
+2000,insurance,40
+2000,real estate and leasing services,40
+2000,professional services,510
+2000,"legal, accounting and management services",280
+2000,architectural and engineering services,210
+2000,other professional services,10
+2000,administrative and support services,30
+2000,"community, social and personal services",90
+2000,education,10
+2000,"health, social and community services",10
+2000,"other community, social and personal services",70
+2000,others,-
+2001,manufacturing,15680
+2001,"food, beverages and tobacco",100
+2001,paper products and printing,130
+2001,"petroleum, chemical and pharmaceutical products",320
+2001,rubber and plastic products,1430
+2001,fabricated metal products,880
+2001,machinery and equipment,1180
+2001,electrical products,620
+2001,electronic products,9800
+2001,medical and precision instruments,250
+2001,transport equipment,230
+2001,other manufacturing industries,750
+2001,construction,900
+2001,services producing industries,10780
+2001,wholesale and retail trade,2970
+2001,wholesale trade,2760
+2001,retail trade,210
+2001,transport and storage,1100
+2001,land transport and supporting services,200
+2001,water transport and supporting services,130
+2001,air transport and supporting services,320
+2001,other transport and storage services,450
+2001,hotels and restaurants,240
+2001,hotels,60
+2001,restaurants,180
+2001,information and communications,1690
+2001,broadcasting and publishing,510
+2001,telecommunications,210
+2001,it and other information services,980
+2001,financial services,2520
+2001,financial institutions,2390
+2001,insurance,140
+2001,real estate and leasing services,100
+2001,professional services,1710
+2001,"legal, accounting and management services",1190
+2001,architectural and engineering services,190
+2001,other professional services,320
+2001,administrative and support services,270
+2001,"community, social and personal services",180
+2001,education,20
+2001,"health, social and community services",20
+2001,"other community, social and personal services",140
+2001,others,200
+2002,manufacturing,9660
+2002,"food, beverages and tobacco",80
+2002,paper products and printing,430
+2002,"petroleum, chemical and pharmaceutical products",260
+2002,rubber and plastic products,710
+2002,fabricated metal products,1440
+2002,machinery and equipment,990
+2002,electrical products,800
+2002,electronic products,4080
+2002,medical and precision instruments,100
+2002,transport equipment,280
+2002,other manufacturing industries,500
+2002,construction,1000
+2002,services producing industries,9290
+2002,wholesale and retail trade,2370
+2002,wholesale trade,2120
+2002,retail trade,250
+2002,transport and storage,530
+2002,land transport and supporting services,50
+2002,water transport and supporting services,200
+2002,air transport and supporting services,20
+2002,other transport and storage services,260
+2002,hotels and restaurants,390
+2002,hotels,240
+2002,restaurants,150
+2002,information and communications,1730
+2002,broadcasting and publishing,310
+2002,telecommunications,490
+2002,it and other information services,930
+2002,financial services,2780
+2002,financial institutions,2650
+2002,insurance,130
+2002,real estate and leasing services,220
+2002,professional services,970
+2002,"legal, accounting and management services",530
+2002,architectural and engineering services,180
+2002,other professional services,260
+2002,administrative and support services,110
+2002,"community, social and personal services",200
+2002,education,10
+2002,"health, social and community services",-
+2002,"other community, social and personal services",180
+2002,others,180
+2003,manufacturing,7480
+2003,"food, beverages and tobacco",170
+2003,paper products and printing,220
+2003,"petroleum, chemical and pharmaceutical products",270
+2003,rubber and plastic products,580
+2003,fabricated metal products,670
+2003,machinery and equipment,500
+2003,electrical products,250
+2003,electronic products,3780
+2003,medical and precision instruments,210
+2003,transport equipment,450
+2003,other manufacturing industries,410
+2003,construction,740
+2003,services producing industries,8770
+2003,wholesale and retail trade,2440
+2003,wholesale trade,1890
+2003,retail trade,550
+2003,transport and storage,2090
+2003,land transport and supporting services,460
+2003,water transport and supporting services,680
+2003,air transport and supporting services,730
+2003,other transport and storage services,220
+2003,hotels and restaurants,430
+2003,hotels,230
+2003,restaurants,210
+2003,information and communications,880
+2003,broadcasting and publishing,110
+2003,telecommunications,250
+2003,it and other information services,510
+2003,financial services,1550
+2003,financial institutions,1450
+2003,insurance,100
+2003,real estate and leasing services,130
+2003,professional services,760
+2003,"legal, accounting and management services",250
+2003,architectural and engineering services,370
+2003,other professional services,140
+2003,administrative and support services,240
+2003,"community, social and personal services",250
+2003,education,30
+2003,"health, social and community services",30
+2003,"other community, social and personal services",190
+2003,others,270
+2004,manufacturing,4700
+2004,"food, beverages and tobacco",140
+2004,paper products and printing,60
+2004,"petroleum, chemical and pharmaceutical products",490
+2004,rubber and plastic products,410
+2004,fabricated metal products,280
+2004,machinery and equipment,360
+2004,electrical products,370
+2004,electronic products,1810
+2004,medical and precision instruments,150
+2004,transport equipment,140
+2004,other manufacturing industries,500
+2004,construction,410
+2004,services producing industries,5220
+2004,wholesale and retail trade,1260
+2004,wholesale trade,1040
+2004,retail trade,220
+2004,transport and storage,1080
+2004,land transport and supporting services,50
+2004,water transport and supporting services,110
+2004,air transport and supporting services,800
+2004,other transport and storage services,120
+2004,hotels and restaurants,610
+2004,hotels,330
+2004,restaurants,270
+2004,information and communications,500
+2004,broadcasting and publishing,120
+2004,telecommunications,170
+2004,it and other information services,210
+2004,financial services,1020
+2004,financial institutions,940
+2004,insurance,80
+2004,real estate and leasing services,90
+2004,professional services,260
+2004,"legal, accounting and management services",130
+2004,architectural and engineering services,90
+2004,other professional services,40
+2004,administrative and support services,100
+2004,"community, social and personal services",300
+2004,education,70
+2004,"health, social and community services",10
+2004,"other community, social and personal services",220
+2004,others,310
+2005,manufacturing,7080
+2005,"food, beverages and tobacco",90
+2005,paper products and printing,60
+2005,"petroleum, chemical and pharmaceutical products",150
+2005,rubber and plastic products,670
+2005,fabricated metal products,440
+2005,machinery and equipment,390
+2005,electrical products,370
+2005,electronic products,4300
+2005,medical and precision instruments,80
+2005,transport equipment,30
+2005,other manufacturing industries,500
+2005,construction,540
+2005,services producing industries,3500
+2005,wholesale and retail trade,980
+2005,wholesale trade,860
+2005,retail trade,120
+2005,transport and storage,290
+2005,land transport and supporting services,30
+2005,water transport and supporting services,50
+2005,air transport and supporting services,60
+2005,other transport and storage services,160
+2005,hotels and restaurants,80
+2005,hotels,-
+2005,restaurants,80
+2005,information and communications,650
+2005,broadcasting and publishing,180
+2005,telecommunications,320
+2005,it and other information services,150
+2005,financial services,690
+2005,financial institutions,670
+2005,insurance,20
+2005,real estate and leasing services,80
+2005,professional services,340
+2005,"legal, accounting and management services",110
+2005,architectural and engineering services,210
+2005,other professional services,30
+2005,administrative and support services,70
+2005,"community, social and personal services",310
+2005,education,10
+2005,"health, social and community services",220
+2005,"other community, social and personal services",80
+2005,others,20
+2006,manufacturing,8860
+2006,"food, beverages and tobacco",140
+2006,"paper,rubber,plastic products and printing",260
+2006,"petroleum, chemical and pharmaceutical products",110
+2006,"fabricated metal products, machinery and equipment",1120
+2006,"electronic, computer and optical products",6630
+2006,transport equipment,110
+2006,other manufacturing industries,500
+2006,construction,490
+2006,services,3670
+2006,wholesale and retail trade,1010
+2006,wholesale trade,960
+2006,retail trade,60
+2006,transportation and storage,410
+2006,land transport and supporting services,30
+2006,water transport and supporting services,100
+2006,air transport and supporting services,150
+2006,other transport and storage services,140
+2006,accommodation and food services,230
+2006,accommodation,90
+2006,food and beverage services,140
+2006,information and communications,620
+2006,"telecommunications, broadcasting and publishing",500
+2006,it and other information services,120
+2006,financial and insurance services,400
+2006,financial services,390
+2006,insurance services,10
+2006,real estate services,150
+2006,professional services,270
+2006,"legal, accounting and management services",190
+2006,architectural and engineering services,30
+2006,other professional services,40
+2006,administrative and support services,210
+2006,security and investigation,-
+2006,cleaning and landscaping,10
+2006,other administrative and support services,190
+2006,"community, social and personal services",370
+2006,public administration and education,170
+2006,health and social services,110
+2006,"arts, entertainment and recreation",60
+2006,"other community, social and personal services",40
+2006,others,70
+2007,manufacturing,5500
+2007,"food, beverages and tobacco",130
+2007,"paper,rubber,plastic products and printing",430
+2007,"petroleum, chemical and pharmaceutical products",50
+2007,"fabricated metal products, machinery and equipment",1060
+2007,"electronic, computer and optical products",2290
+2007,transport equipment,100
+2007,other manufacturing industries,1450
+2007,construction,80
+2007,services,2990
+2007,wholesale and retail trade,1240
+2007,wholesale trade,1140
+2007,retail trade,100
+2007,transportation and storage,270
+2007,land transport and supporting services,30
+2007,water transport and supporting services,20
+2007,air transport and supporting services,120
+2007,other transport and storage services,100
+2007,accommodation and food services,330
+2007,accommodation,160
+2007,food and beverage services,160
+2007,information and communications,270
+2007,"telecommunications, broadcasting and publishing",130
+2007,it and other information services,150
+2007,financial and insurance services,180
+2007,financial services,180
+2007,insurance services,-
+2007,real estate services,10
+2007,professional services,280
+2007,"legal, accounting and management services",200
+2007,architectural and engineering services,30
+2007,other professional services,50
+2007,administrative and support services,140
+2007,security and investigation,-
+2007,cleaning and landscaping,20
+2007,other administrative and support services,120
+2007,"community, social and personal services",270
+2007,public administration and education,120
+2007,health and social services,40
+2007,"arts, entertainment and recreation",90
+2007,"other community, social and personal services",20
+2007,others,20
+2008,manufacturing,10420
+2008,"food, beverages and tobacco",80
+2008,"paper,rubber,plastic products and printing",840
+2008,"petroleum, chemical and pharmaceutical products",200
+2008,"fabricated metal products, machinery and equipment",2000
+2008,"electronic, computer and optical products",5320
+2008,transport equipment,800
+2008,other manufacturing industries,1190
+2008,construction,540
+2008,services,5870
+2008,wholesale and retail trade,1530
+2008,wholesale trade,1400
+2008,retail trade,130
+2008,transportation and storage,600
+2008,land transport and supporting services,70
+2008,water transport and supporting services,80
+2008,air transport and supporting services,140
+2008,other transport and storage services,310
+2008,accommodation and food services,150
+2008,accommodation,30
+2008,food and beverage services,120
+2008,information and communications,450
+2008,"telecommunications, broadcasting and publishing",120
+2008,it and other information services,330
+2008,financial and insurance services,1440
+2008,financial services,1380
+2008,insurance services,60
+2008,real estate services,70
+2008,professional services,700
+2008,"legal, accounting and management services",290
+2008,architectural and engineering services,240
+2008,other professional services,170
+2008,administrative and support services,370
+2008,security and investigation,-
+2008,cleaning and landscaping,20
+2008,other administrative and support services,340
+2008,"community, social and personal services",570
+2008,public administration and education,120
+2008,health and social services,160
+2008,"arts, entertainment and recreation",230
+2008,"other community, social and personal services",60
+2008,others,50
+2009,manufacturing,13640
+2009,"food, beverages and tobacco",10
+2009,"paper,rubber,plastic products and printing",780
+2009,"petroleum, chemical and pharmaceutical products",230
+2009,"fabricated metal products, machinery and equipment",3170
+2009,"electronic, computer and optical products",6460
+2009,transport equipment,1460
+2009,other manufacturing industries,1520
+2009,construction,980
+2009,services,8720
+2009,wholesale and retail trade,2670
+2009,wholesale trade,2480
+2009,retail trade,190
+2009,transportation and storage,1050
+2009,land transport and supporting services,60
+2009,water transport and supporting services,220
+2009,air transport and supporting services,420
+2009,other transport and storage services,360
+2009,accommodation and food services,200
+2009,accommodation,60
+2009,food and beverage services,140
+2009,information and communications,690
+2009,"telecommunications, broadcasting and publishing",260
+2009,it and other information services,420
+2009,financial and insurance services,1840
+2009,financial services,1780
+2009,insurance services,70
+2009,real estate services,140
+2009,professional services,1210
+2009,"legal, accounting and management services",610
+2009,architectural and engineering services,370
+2009,other professional services,230
+2009,administrative and support services,690
+2009,security and investigation,70
+2009,cleaning and landscaping,90
+2009,other administrative and support services,540
+2009,"community, social and personal services",240
+2009,public administration and education,100
+2009,health and social services,20
+2009,"arts, entertainment and recreation",10
+2009,"other community, social and personal services",120
+2009,others,90
+2010,manufacturing,4490
+2010,"food, beverages and tobacco",20
+2010,"paper,rubber,plastic products and printing",470
+2010,"petroleum, chemical and pharmaceutical products",160
+2010,"fabricated metal products, machinery and equipment",1570
+2010,"electronic, computer and optical products",1720
+2010,transport equipment,280
+2010,other manufacturing industries,270
+2010,construction,1350
+2010,services,3960
+2010,wholesale and retail trade,1170
+2010,wholesale trade,940
+2010,retail trade,220
+2010,transportation and storage,320
+2010,land transport and supporting services,60
+2010,water transport and supporting services,80
+2010,air transport and supporting services,110
+2010,other transport and storage services,80
+2010,accommodation and food services,130
+2010,accommodation,-
+2010,food and beverage services,130
+2010,information and communications,350
+2010,"telecommunications, broadcasting and publishing",220
+2010,it and other information services,130
+2010,financial and insurance services,610
+2010,financial services,570
+2010,insurance services,40
+2010,real estate services,130
+2010,professional services,720
+2010,"legal, accounting and management services",370
+2010,architectural and engineering services,330
+2010,other professional services,20
+2010,administrative and support services,270
+2010,security and investigation,-
+2010,cleaning and landscaping,50
+2010,other administrative and support services,220
+2010,"community, social and personal services",260
+2010,public administration and education,50
+2010,health and social services,30
+2010,"arts, entertainment and recreation",50
+2010,"other community, social and personal services",130
+2010,others,-
+2011,manufacturing,4460
+2011,"food, beverages and tobacco",10
+2011,"paper,rubber,plastic products and printing",660
+2011,"petroleum, chemical and pharmaceutical products",330
+2011,"fabricated metal products, machinery and equipment",630
+2011,"electronic, computer and optical products",2020
+2011,transport equipment,180
+2011,other manufacturing industries,640
+2011,construction,1050
+2011,services,4430
+2011,wholesale and retail trade,1050
+2011,wholesale trade,750
+2011,retail trade,300
+2011,transportation and storage,230
+2011,land transport and supporting services,70
+2011,water transport and supporting services,70
+2011,air transport and supporting services,30
+2011,other transport and storage services,70
+2011,accommodation and food services,350
+2011,accommodation,210
+2011,food and beverage services,140
+2011,information and communications,500
+2011,"telecommunications, broadcasting and publishing",250
+2011,it and other information services,250
+2011,financial and insurance services,860
+2011,financial services,790
+2011,insurance services,70
+2011,real estate services,130
+2011,professional services,940
+2011,"legal, accounting and management services",450
+2011,architectural and engineering services,200
+2011,other professional services,290
+2011,administrative and support services,100
+2011,security and investigation,-
+2011,cleaning and landscaping,20
+2011,other administrative and support services,80
+2011,"community, social and personal services",260
+2011,public administration and education,10
+2011,health and social services,-
+2011,"arts, entertainment and recreation",50
+2011,"other community, social and personal services",190
+2011,others,50
+2012,manufacturing,4050
+2012,"food, beverages and tobacco",30
+2012,"paper,rubber,plastic products and printing",590
+2012,"petroleum, chemical and pharmaceutical products",240
+2012,"fabricated metal products, machinery and equipment",750
+2012,"electronic, computer and optical products",1790
+2012,transport equipment,130
+2012,other manufacturing industries,540
+2012,construction,650
+2012,services,6300
+2012,wholesale and retail trade,1830
+2012,wholesale trade,1270
+2012,retail trade,560
+2012,transportation and storage,280
+2012,land transport and supporting services,10
+2012,water transport and supporting services,150
+2012,air transport and supporting services,10
+2012,other transport and storage services,110
+2012,accommodation and food services,270
+2012,accommodation,100
+2012,food and beverage services,170
+2012,information and communications,730
+2012,"telecommunications, broadcasting and publishing",340
+2012,it and other information services,390
+2012,financial and insurance services,1380
+2012,financial services,1310
+2012,insurance services,80
+2012,real estate services,60
+2012,professional services,1230
+2012,"legal, accounting and management services",560
+2012,architectural and engineering services,470
+2012,other professional services,200
+2012,administrative and support services,280
+2012,security and investigation,20
+2012,cleaning and landscaping,20
+2012,other administrative and support services,240
+2012,"community, social and personal services",240
+2012,public administration and education,50
+2012,health and social services,40
+2012,"arts, entertainment and recreation",100
+2012,"other community, social and personal services",60
+2012,others,10
+2013,manufacturing,5000
+2013,"food, beverages and tobacco",40
+2013,"paper,rubber,plastic products and printing",380
+2013,"petroleum, chemical and pharmaceutical products",220
+2013,"fabricated metal products, machinery and equipment",690
+2013,"electronic, computer and optical products",2280
+2013,transport equipment,200
+2013,other manufacturing industries,1200
+2013,construction,1120
+2013,services,5430
+2013,wholesale and retail trade,1280
+2013,wholesale trade,1180
+2013,retail trade,100
+2013,transportation and storage,450
+2013,land transport and supporting services,10
+2013,water transport and supporting services,130
+2013,air transport and supporting services,100
+2013,other transport and storage services,210
+2013,accommodation and food services,220
+2013,accommodation,10
+2013,food and beverage services,210
+2013,information and communications,840
+2013,"telecommunications, broadcasting and publishing",480
+2013,it and other information services,360
+2013,financial and insurance services,1270
+2013,financial services,1230
+2013,insurance services,40
+2013,real estate services,30
+2013,professional services,960
+2013,"legal, accounting and management services",590
+2013,architectural and engineering services,240
+2013,other professional services,120
+2013,administrative and support services,210
+2013,security and investigation,-
+2013,cleaning and landscaping,10
+2013,other administrative and support services,190
+2013,"community, social and personal services",190
+2013,public administration and education,30
+2013,health and social services,10
+2013,"arts, entertainment and recreation",40
+2013,"other community, social and personal services",120
+2013,others,10
+2014,manufacturing,3970
+2014,"food, beverages and tobacco",120
+2014,"paper,rubber,plastic products and printing",150
+2014,"petroleum, chemical and pharmaceutical products",170
+2014,"fabricated metal products, machinery and equipment",1350
+2014,"electronic, computer and optical products",1290
+2014,transport equipment,440
+2014,other manufacturing industries,460
+2014,construction,1690
+2014,services,7260
+2014,wholesale and retail trade,2190
+2014,wholesale trade,1490
+2014,retail trade,700
+2014,transportation and storage,470
+2014,land transport and supporting services,-
+2014,water transport and supporting services,210
+2014,air transport and supporting services,20
+2014,other transport and storage services,240
+2014,accommodation and food services,380
+2014,accommodation,240
+2014,food and beverage services,140
+2014,information and communications,810
+2014,"telecommunications, broadcasting and publishing",350
+2014,it and other information services,450
+2014,financial and insurance services,1350
+2014,financial services,1280
+2014,insurance services,60
+2014,real estate services,90
+2014,professional services,1520
+2014,"legal, accounting and management services",1030
+2014,architectural and engineering services,350
+2014,other professional services,140
+2014,administrative and support services,340
+2014,security and investigation,110
+2014,cleaning and landscaping,10
+2014,other administrative and support services,210
+2014,"community, social and personal services",130
+2014,public administration and education,40
+2014,health and social services,20
+2014,"arts, entertainment and recreation",20
+2014,"other community, social and personal services",50
+2014,others,10
+2015,manufacturing,5210
+2015,"food, beverages and tobacco",80
+2015,"paper,rubber,plastic products and printing",570
+2015,"petroleum, chemical and pharmaceutical products",320
+2015,"fabricated metal products, machinery and equipment",1780
+2015,"electronic, computer and optical products",1630
+2015,transport equipment,570
+2015,other manufacturing industries,260
+2015,construction,1780
+2015,services,8510
+2015,wholesale and retail trade,2180
+2015,wholesale trade,2150
+2015,retail trade,30
+2015,transportation and storage,690
+2015,land transport and supporting services,60
+2015,water transport and supporting services,280
+2015,air transport and supporting services,110
+2015,other transport and storage services,250
+2015,accommodation and food services,200
+2015,accommodation,10
+2015,food and beverage services,190
+2015,information and communications,730
+2015,"telecommunications, broadcasting and publishing",280
+2015,it and other information services,450
+2015,financial and insurance services,1760
+2015,financial services,1710
+2015,insurance services,50
+2015,real estate services,50
+2015,professional services,2290
+2015,"legal, accounting and management services",1180
+2015,architectural and engineering services,940
+2015,other professional services,170
+2015,administrative and support services,380
+2015,security and investigation,70
+2015,cleaning and landscaping,50
+2015,other administrative and support services,260
+2015,"community, social and personal services",230
+2015,public administration and education,40
+2015,health and social services,90
+2015,"arts, entertainment and recreation",10
+2015,"other community, social and personal services",80
+2015,others,80
+2016,manufacturing,6280
+2016,"food, beverages and tobacco",330
+2016,"paper,rubber,plastic products and printing",410
+2016,"petroleum, chemical and pharmaceutical products",360
+2016,"fabricated metal products, machinery and equipment",2400
+2016,"electronic, computer and optical products",1670
+2016,transport equipment,720
+2016,other manufacturing industries,390
+2016,construction,1920
+2016,services,10880
+2016,wholesale and retail trade,2380
+2016,wholesale trade,2200
+2016,retail trade,180
+2016,transportation and storage,870
+2016,land transport and supporting services,10
+2016,water transport and supporting services,490
+2016,air transport and supporting services,160
+2016,other transport and storage services,220
+2016,accommodation and food services,350
+2016,accommodation,70
+2016,food and beverage services,280
+2016,information and communications,970
+2016,"telecommunications, broadcasting and publishing",570
+2016,it and other information services,410
+2016,financial and insurance services,2310
+2016,financial services,2210
+2016,insurance services,90
+2016,real estate services,90
+2016,professional services,2740
+2016,"legal, accounting and management services",1410
+2016,architectural and engineering services,1050
+2016,other professional services,280
+2016,administrative and support services,340
+2016,security and investigation,20
+2016,cleaning and landscaping,60
+2016,other administrative and support services,260
+2016,"community, social and personal services",850
+2016,public administration and education,50
+2016,health and social services,40
+2016,"arts, entertainment and recreation",500
+2016,"other community, social and personal services",260
+2016,others,100
+2017,manufacturing,3790
+2017,"food, beverages and tobacco",190
+2017,"paper,rubber,plastic products and printing",480
+2017,"petroleum, chemical and pharmaceutical products",300
+2017,"fabricated metal products, machinery and equipment",930
+2017,"electronic, computer and optical products",920
+2017,transport equipment,820
+2017,other manufacturing industries,150
+2017,construction,2020
+2017,services,8900
+2017,wholesale and retail trade,2180
+2017,wholesale trade,1920
+2017,retail trade,260
+2017,transportation and storage,890
+2017,land transport and supporting services,160
+2017,water transport and supporting services,300
+2017,air transport and supporting services,20
+2017,other transport and storage services,420
+2017,accommodation and food services,470
+2017,accommodation,120
+2017,food and beverage services,350
+2017,information and communications,940
+2017,"telecommunications, broadcasting and publishing",500
+2017,it and other information services,450
+2017,financial and insurance services,1780
+2017,financial services,1720
+2017,insurance services,60
+2017,real estate services,70
+2017,professional services,1700
+2017,"legal, accounting and management services",860
+2017,architectural and engineering services,560
+2017,other professional services,280
+2017,administrative and support services,410
+2017,security and investigation,120
+2017,cleaning and landscaping,70
+2017,other administrative and support services,230
+2017,"community, social and personal services",460
+2017,public administration and education,40
+2017,health and social services,50
+2017,"arts, entertainment and recreation",240
+2017,"other community, social and personal services",130
+2017,others,20
+2018,manufacturing,2570
+2018,"food, beverages and tobacco",200
+2018,"paper,rubber,plastic products and printing",160
+2018,"petroleum, chemical and pharmaceutical products",180
+2018,"fabricated metal products, machinery and equipment",870
+2018,"electronic, computer and optical products",670
+2018,transport equipment,310
+2018,other manufacturing industries,190
+2018,construction,1200
+2018,services,6960
+2018,wholesale and retail trade,1780
+2018,wholesale trade,1580
+2018,retail trade,210
+2018,transportation and storage,690
+2018,land transport and supporting services,200
+2018,water transport and supporting services,180
+2018,air transport and supporting services,20
+2018,other transport and storage services,300
+2018,accommodation and food services,350
+2018,accommodation,10
+2018,food and beverage services,340
+2018,information and communications,1120
+2018,"telecommunications, broadcasting and publishing",650
+2018,it and other information services,470
+2018,financial and insurance services,1330
+2018,financial services,1240
+2018,insurance services,80
+2018,real estate services,100
+2018,professional services,1100
+2018,"legal, accounting and management services",600
+2018,architectural and engineering services,310
+2018,other professional services,190
+2018,administrative and support services,200
+2018,security and investigation,10
+2018,cleaning and landscaping,40
+2018,other administrative and support services,160
+2018,"community, social and personal services",290
+2018,public administration and education,90
+2018,health and social services,20
+2018,"arts, entertainment and recreation",130
+2018,"other community, social and personal services",50
+2018,others,-
+2019,manufacturing,2790
+2019,"food, beverages and tobacco",100
+2019,"paper,rubber,plastic products and printing",170
+2019,"petroleum, chemical and pharmaceutical products",200
+2019,"fabricated metal products, machinery and equipment",690
+2019,"electronic, computer and optical products",1160
+2019,transport equipment,120
+2019,other manufacturing industries,360
+2019,construction,860
+2019,services,7000
+2019,wholesale and retail trade,2090
+2019,wholesale trade,1850
+2019,retail trade,240
+2019,transportation and storage,760
+2019,land transport and supporting services,60
+2019,water transport and supporting services,80
+2019,air transport and supporting services,50
+2019,other transport and storage services,580
+2019,accommodation and food services,170
+2019,accommodation,20
+2019,food and beverage services,150
+2019,information and communications,710
+2019,"telecommunications, broadcasting and publishing",300
+2019,it and other information services,410
+2019,financial and insurance services,1300
+2019,financial services,1190
+2019,insurance services,110
+2019,real estate services,190
+2019,professional services,1210
+2019,"legal, accounting and management services",640
+2019,architectural and engineering services,360
+2019,other professional services,220
+2019,administrative and support services,260
+2019,security and investigation,10
+2019,cleaning and landscaping,60
+2019,other administrative and support services,200
+2019,"community, social and personal services",300
+2019,public administration and education,90
+2019,health and social services,100
+2019,"arts, entertainment and recreation",20
+2019,"other community, social and personal services",90
+2019,others,30
+2020,manufacturing,5320
+2020,"food, beverages and tobacco",330
+2020,"paper,rubber,plastic products and printing",230
+2020,"petroleum, chemical and pharmaceutical products",160
+2020,"fabricated metal products, machinery and equipment",1410
+2020,"electronic, computer and optical products",790
+2020,transport equipment,1710
+2020,other manufacturing industries,700
+2020,construction,990
+2020,services,19760
+2020,wholesale and retail trade,4980
+2020,wholesale trade,3810
+2020,retail trade,1180
+2020,transportation and storage,2780
+2020,land transport and supporting services,120
+2020,water transport and supporting services,250
+2020,air transport and supporting services,2000
+2020,other transport and storage services,410
+2020,accommodation and food services,1700
+2020,accommodation,710
+2020,food and beverage services,990
+2020,information and communications,1430
+2020,"telecommunications, broadcasting and publishing",570
+2020,it and other information services,860
+2020,financial and insurance services,2140
+2020,financial services,1910
+2020,insurance services,230
+2020,real estate services,140
+2020,professional services,2310
+2020,"legal, accounting and management services",1200
+2020,architectural and engineering services,780
+2020,other professional services,330
+2020,administrative and support services,1600
+2020,security and investigation,10
+2020,cleaning and landscaping,280
+2020,other administrative and support services,1320
+2020,"community, social and personal services",2690
+2020,public administration and education,230
+2020,health and social services,40
+2020,"arts, entertainment and recreation",2210
+2020,"other community, social and personal services",210
+2020,others,40
+2021,manufacturing,1710
+2021,"food, beverages and tobacco",110
+2021,"paper,rubber,plastic products and printing",70
+2021,"petroleum, chemical and pharmaceutical products",500
+2021,"fabricated metal products, machinery and equipment",150
+2021,"electronic, computer and optical products",690
+2021,transport equipment,130
+2021,other manufacturing industries,70
+2021,construction,240
+2021,services,6020
+2021,wholesale and retail trade,1400
+2021,wholesale trade,1250
+2021,retail trade,160
+2021,transportation and storage,550
+2021,land transport and supporting services,50
+2021,water transport and supporting services,140
+2021,air transport and supporting services,220
+2021,other transport and storage services,140
+2021,accommodation and food services,180
+2021,accommodation,40
+2021,food and beverage services,130
+2021,information and communications,1040
+2021,"telecommunications, broadcasting and publishing",380
+2021,it and other information services,670
+2021,financial and insurance services,1330
+2021,financial services,1250
+2021,insurance services,70
+2021,real estate services,100
+2021,professional services,920
+2021,"legal, accounting and management services",660
+2021,architectural and engineering services,160
+2021,other professional services,100
+2021,administrative and support services,340
+2021,security and investigation,10
+2021,cleaning and landscaping,20
+2021,other administrative and support services,310
+2021,"community, social and personal services",170
+2021,public administration and education,60
+2021,health and social services,10
+2021,"arts, entertainment and recreation",70
+2021,"other community, social and personal services",40
+2021,others,50
+2022,manufacturing,2100
+2022,"food, beverages and tobacco",30
+2022,"paper,rubber,plastic products and printing",30
+2022,"petroleum, chemical and pharmaceutical products",220
+2022,"fabricated metal products, machinery and equipment",560
+2022,"electronic, computer and optical products",870
+2022,transport equipment,320
+2022,other manufacturing industries,80
+2022,construction,260
+2022,services,4060
+2022,wholesale and retail trade,910
+2022,wholesale trade,850
+2022,retail trade,70
+2022,transportation and storage,150
+2022,land transport and supporting services,10
+2022,water transport and supporting services,60
+2022,air transport and supporting services,10
+2022,other transport and storage services,70
+2022,accommodation and food services,40
+2022,accommodation,20
+2022,food and beverage services,20
+2022,information and communications,1200
+2022,"telecommunications, broadcasting and publishing",410
+2022,it and other information services,790
+2022,financial and insurance services,700
+2022,financial services,670
+2022,insurance services,30
+2022,real estate services,30
+2022,professional services,490
+2022,"legal, accounting and management services",270
+2022,architectural and engineering services,100
+2022,other professional services,120
+2022,administrative and support services,230
+2022,security and investigation,10
+2022,cleaning and landscaping,30
+2022,other administrative and support services,190
+2022,"community, social and personal services",310
+2022,public administration and education,50
+2022,health and social services,90
+2022,"arts, entertainment and recreation",60
+2022,"other community, social and personal services",110
+2022,others,30
+2023,manufacturing,3470
+2023,"food, beverages and tobacco",160
+2023,"paper,rubber,plastic products and printing",130
+2023,"petroleum, chemical and pharmaceutical products",240
+2023,"fabricated metal products, machinery and equipment",530
+2023,"electronic, computer and optical products",2080
+2023,transport equipment,140
+2023,other manufacturing industries,200
+2023,construction,590
+2023,services,10440
+2023,wholesale and retail trade,2850
+2023,wholesale trade,2560
+2023,retail trade,290
+2023,transportation and storage,540
+2023,land transport and supporting services,210
+2023,water transport and supporting services,100
+2023,air transport and supporting services,-
+2023,other transport and storage services,230
+2023,accommodation and food services,150
+2023,accommodation,-
+2023,food and beverage services,150
+2023,information and communications,2740
+2023,"telecommunications, broadcasting and publishing",720
+2023,it and other information services,2010
+2023,financial and insurance services,1820
+2023,financial services,1650
+2023,insurance services,170
+2023,real estate services,80
+2023,professional services,1620
+2023,"legal, accounting and management services",1030
+2023,architectural and engineering services,210
+2023,other professional services,380
+2023,administrative and support services,380
+2023,security and investigation,20
+2023,cleaning and landscaping,10
+2023,other administrative and support services,350
+2023,"community, social and personal services",280
+2023,public administration and education,60
+2023,health and social services,80
+2023,"arts, entertainment and recreation",30
+2023,"other community, social and personal services",120
+2023,others,80
+2024,manufacturing,2780
+2024,"food, beverages and tobacco",60
+2024,"paper,rubber,plastic products and printing",370
+2024,"petroleum, chemical and pharmaceutical products",560
+2024,"fabricated metal products, machinery and equipment",840
+2024,"electronic, computer and optical products",770
+2024,transport equipment,40
+2024,other manufacturing industries,140
+2024,construction,460
+2024,services,9670
+2024,wholesale and retail trade,2170
+2024,wholesale trade,1910
+2024,retail trade,260
+2024,transportation and storage,520
+2024,land transport and supporting services,50
+2024,water transport and supporting services,130
+2024,air transport and supporting services,-
+2024,other transport and storage services,340
+2024,accommodation and food services,180
+2024,accommodation,20
+2024,food and beverage services,160
+2024,information and communications,2060
+2024,"telecommunications, broadcasting and publishing",560
+2024,it and other information services,1500
+2024,financial and insurance services,1880
+2024,financial services,1690
+2024,insurance services,190
+2024,real estate services,80
+2024,professional services,1870
+2024,"legal, accounting and management services",1040
+2024,architectural and engineering services,370
+2024,other professional services,470
+2024,administrative and support services,540
+2024,security and investigation,50
+2024,cleaning and landscaping,10
+2024,other administrative and support services,480
+2024,"community, social and personal services",360
+2024,public administration and education,220
+2024,health and social services,50
+2024,"arts, entertainment and recreation",50
+2024,"other community, social and personal services",50
+2024,others,120
+2025,manufacturing,2780
+2025,"food, beverages and tobacco",120
+2025,"paper,rubber,plastic products and printing",60
+2025,"petroleum, chemical and pharmaceutical products",700
+2025,"fabricated metal products, machinery and equipment",950
+2025,"electronic, computer and optical products",730
+2025,transport equipment,70
+2025,other manufacturing industries,160
+2025,construction,580
+2025,services,10980
+2025,wholesale and retail trade,2320
+2025,wholesale trade,1870
+2025,retail trade,450
+2025,transportation and storage,1180
+2025,land transport and supporting services,50
+2025,water transport and supporting services,260
+2025,air transport and supporting services,520
+2025,other transport and storage services,340
+2025,accommodation and food services,240
+2025,accommodation,90
+2025,food and beverage services,150
+2025,information and communications,1930
+2025,"telecommunications, broadcasting and publishing",460
+2025,it and other information services,1470
+2025,financial and insurance services,2360
+2025,financial services,2240
+2025,insurance services,120
+2025,real estate services,80
+2025,professional services,1900
+2025,"legal, accounting and management services",980
+2025,architectural and engineering services,380
+2025,other professional services,540
+2025,administrative and support services,500
+2025,security and investigation,20
+2025,cleaning and landscaping,-
+2025,other administrative and support services,480
+2025,"community, social and personal services",470
+2025,public administration and education,150
+2025,health and social services,190
+2025,"arts, entertainment and recreation",40
+2025,"other community, social and personal services",100
+2025,others,160

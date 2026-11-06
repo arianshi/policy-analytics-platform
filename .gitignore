@@ -1,0 +1,15 @@
+.env
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.coverage
+coverage.xml
+junit.xml
+htmlcov
+backend/var
+node_modules
+.next
+*.tsbuildinfo
+.DS_Store

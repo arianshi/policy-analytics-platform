@@ -1,0 +1,92 @@
+{
+  "mom.basic_wage_change": {
+    "bytes": 12946,
+    "dataset_id": "d_bd83b4534db1032ca7415f82bbaae003",
+    "page_url": "https://data.gov.sg/datasets/d_bd83b4534db1032ca7415f82bbaae003/view",
+    "retrieved_at": "2026-10-30T06:32:46+00:00",
+    "sha256": "493978a74bc7a9179e3f4524af7f212d7269a0c5c56b0f7081f1e4b2e1755c3d",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_bd83b4534db1032ca7415f82bbaae003/poll-download",
+    "title": "Basic Wage (Nominal) Changes by Industry"
+  },
+  "mom.employed_residents": {
+    "bytes": 342188,
+    "dataset_id": "d_a7ece9330c024a90b258776e69c2ae00",
+    "page_url": "https://data.gov.sg/datasets/d_a7ece9330c024a90b258776e69c2ae00/view",
+    "retrieved_at": "2026-10-30T06:32:04+00:00",
+    "sha256": "09500367755a97e113054db9bec875e3e7f626dbbfd7948cc6823d4a2a7c3207",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_a7ece9330c024a90b258776e69c2ae00/poll-download",
+    "title": "Employed Residents Aged 15 Years & Over by Industry, Age And Sex"
+  },
+  "mom.job_vacancies": {
+    "bytes": 45113,
+    "dataset_id": "d_01966fdb498fa7fa2863635e25539693",
+    "page_url": "https://data.gov.sg/datasets/d_01966fdb498fa7fa2863635e25539693/view",
+    "retrieved_at": "2026-10-30T06:32:08+00:00",
+    "sha256": "a173f6bc40ee94035c2c2114b7c4522dee53cfaf7df5dc4c69316c919a2af90f",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_01966fdb498fa7fa2863635e25539693/poll-download",
+    "title": "Number of Job Vacancy by Industry - Annual"
+  },
+  "mom.job_vacancy_rate": {
+    "bytes": 44164,
+    "dataset_id": "d_c53ea3b4afe234c08853b7fca12e804e",
+    "page_url": "https://data.gov.sg/datasets/d_c53ea3b4afe234c08853b7fca12e804e/view",
+    "retrieved_at": "2026-10-30T06:32:17+00:00",
+    "sha256": "894040c3110d768562ce6fcce36ab51fea07be1aa985386a76aed293a8a864f9",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_c53ea3b4afe234c08853b7fca12e804e/poll-download",
+    "title": "Job Vacancy Rate by Industry - Annual"
+  },
+  "mom.recruitment_rate": {
+    "bytes": 44149,
+    "dataset_id": "d_df2976561f50447ff200a3230b2b0396",
+    "page_url": "https://data.gov.sg/datasets/d_df2976561f50447ff200a3230b2b0396/view",
+    "retrieved_at": "2026-10-30T06:32:21+00:00",
+    "sha256": "6db2bca38104b2a5d9415a8b68941e6c55daf6a716a353dda600ced8d7035ac0",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_df2976561f50447ff200a3230b2b0396/poll-download",
+    "title": "Average Monthly Recruitment Rate by Industry - Annual"
+  },
+  "mom.resignation_rate": {
+    "bytes": 44157,
+    "dataset_id": "d_83f04fc0e00cb029000aa3bf8c5d0478",
+    "page_url": "https://data.gov.sg/datasets/d_83f04fc0e00cb029000aa3bf8c5d0478/view",
+    "retrieved_at": "2026-10-30T06:32:30+00:00",
+    "sha256": "bdd6e9e42bb45325d8c3f6643d329b8765759e8a2f057f1f322079210e60406c",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_83f04fc0e00cb029000aa3bf8c5d0478/poll-download",
+    "title": "Average Monthly Resignation Rate by Industry - Annual"
+  },
+  "mom.retrenchments": {
+    "bytes": 44343,
+    "dataset_id": "d_661bf51b24d91dff23c053fc461c0923",
+    "page_url": "https://data.gov.sg/datasets/d_661bf51b24d91dff23c053fc461c0923/view",
+    "retrieved_at": "2026-10-30T06:32:34+00:00",
+    "sha256": "a481f581ad515e9c5add872e95eecc9867c3527dbf9443ee827c2745ed9ec0f0",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_661bf51b24d91dff23c053fc461c0923/poll-download",
+    "title": "Number of Retrenched Employees by Industry - Annual"
+  },
+  "mom.total_wage_change": {
+    "bytes": 12944,
+    "dataset_id": "d_e5848828d6a14d35a8b7eea7e15a149e",
+    "page_url": "https://data.gov.sg/datasets/d_e5848828d6a14d35a8b7eea7e15a149e/view",
+    "retrieved_at": "2026-10-30T06:32:42+00:00",
+    "sha256": "4fe03b5bcc2fb5182d9e99af640eaedd756d20f9e593de8a148b10495c18639e",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_e5848828d6a14d35a8b7eea7e15a149e/poll-download",
+    "title": "Total Wage (Nominal) Changes by Industry"
+  },
+  "mom.unemployment_rate": {
+    "bytes": 604,
+    "dataset_id": "d_80effd26c9ca5755a7ff0598fe2e0be6",
+    "page_url": "https://data.gov.sg/datasets/d_80effd26c9ca5755a7ff0598fe2e0be6/view",
+    "retrieved_at": "2026-10-30T06:32:55+00:00",
+    "sha256": "43353c6df857d75d1e6d22725a33d356bfb03b61f82986c4e100a9c8788cccfa",
+    "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_80effd26c9ca5755a7ff0598fe2e0be6/poll-download",
+    "title": "Overall Unemployment Rate, Annual"
+  },
+  "singstat.gdp_by_industry": {
+    "bytes": 27061,
+    "dataset_id": "M015731",
+    "page_url": "https://tablebuilder.singstat.gov.sg/table/TS/M015731",
+    "retrieved_at": "2026-10-30T06:32:59+00:00",
+    "sha256": "38a36ac7186c8638611d8bda531f732d49dc443b26c376d864b722d8793d21b3",
+    "source_url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M015731?timeFilter=2000..2026",
+    "title": "Gross Domestic Product At Current Prices, By Industry (SSIC 2020), Annual"
+  }
+}

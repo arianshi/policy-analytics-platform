@@ -1,0 +1,32 @@
+[project]
+name = "policy-analytics-backend"
+version = "1.0.0"
+description = "Agentic policy data analytics platform - backend"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"
+extend-exclude = [".venv", "var"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = ["RUF012", "B008", "E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q --strict-markers"
+markers = [
+    "live: hits real government APIs (skipped unless RUN_LIVE=1)",
+    "live_llm: hits real LLM providers (skipped unless keys are configured)",
+    "perf: performance / load tests",
+]
+
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = false
+skip_covered = true
