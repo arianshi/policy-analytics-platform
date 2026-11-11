@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars (git-ignored) to override defaults. Nothing here is a secret.
+
+# Datadog monitoring (docs/DATADOG.md). The API key is a secret, so it is NOT set here:
+#   export TF_VAR_datadog_api_key=...
+# datadog_enabled            = true
+# datadog_rum_application_id = "..."   # from the Datadog RUM application
+# datadog_rum_client_token   = "pub..." # public by design, shipped to every browser
+
+# Pin the Deployment to a build; get the digest after `oc start-build`:
+#   oc get is openshift-node-app -o jsonpath='{.status.tags[0].items[0].image}'
+# image_digest = "sha256:..."
+
+# Database (defaults shown). The passwords are generated; nothing secret goes in this file.
+# db_image        = "image-registry.openshift-image-registry.svc:5000/openshift/postgresql:15-el9"
+# db_storage_size = "1Gi"
+
+# The keeper (terraform/keeper.tf): scales the app and database back up after the Sandbox idler
+# stops them. Defaults shown. Tighten the schedule for a shorter gap, or turn it off on a cluster
+# without an idler.
+# keeper_enabled  = true
+# keeper_schedule = "*/5 * * * *"
+# keeper_image    = "image-registry.openshift-image-registry.svc:5000/openshift/cli:latest"

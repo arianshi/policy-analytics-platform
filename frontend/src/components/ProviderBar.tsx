@@ -1,9 +1,13 @@
 import type { ProviderStatus } from "@/lib/types";
 
-export function ProviderBar({ providers }: { providers: ProviderStatus[] }) {
+// Production builds set NEXT_PUBLIC_HIDE_OFFLINE=true: the rule-based fallback still runs, but is not advertised in the header.
+const HIDE_OFFLINE = process.env.NEXT_PUBLIC_HIDE_OFFLINE === "true";
+
+export function ProviderBar({ providers, hideOffline = HIDE_OFFLINE }: { providers: ProviderStatus[]; hideOffline?: boolean }) {
+  const shown = hideOffline ? providers.filter((p) => p.name !== "offline") : providers;
   return (
     <ul className="providers" aria-label="LLM providers">
-      {providers.map((p) => (
+      {shown.map((p) => (
         <li
           key={p.name}
           className={`prov ${p.configured ? (p.circuit === "closed" ? "ok" : "warn") : "off"}`}

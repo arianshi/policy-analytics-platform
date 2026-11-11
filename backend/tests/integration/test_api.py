@@ -227,3 +227,14 @@ def test_result_is_valid_json_roundtrip(client):
     rec = wait_done(client, aid)
     assert json.loads(json.dumps(rec))["result"]["report"]["title"]
     assert Settings
+
+
+def test_single_image_serves_the_frontend_without_shadowing_the_api(settings, tmp_path):
+    web = tmp_path / "web"
+    web.mkdir()
+    (web / "index.html").write_text("<html>policy analytics</html>")
+    with TestClient(create_app(settings.model_copy(update={"web_dir": web}))) as c:
+        assert c.get("/healthz").json() == {"status": "ok"}
+        assert "policy analytics" in c.get("/").text
+        assert c.get("/api/health").json()["status"] == "ok"  # API routes win over the static mount
+        assert c.get("/api/analyses/nope").status_code == 404

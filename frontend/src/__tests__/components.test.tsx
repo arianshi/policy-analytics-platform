@@ -143,6 +143,21 @@ describe("ProviderBar", () => {
     expect(screen.getByText("openai").closest("li")).toHaveClass("warn");
     expect(screen.getByText("offline").closest("li")).toHaveClass("ok");
   });
+
+  it("hides the offline fallback in production builds", () => {
+    const base = { model: "m", calls: 0, failures: 0, skipped: 0, cost_usd: 0, avg_latency_ms: 0, last_error: "" };
+    render(
+      <ProviderBar
+        hideOffline
+        providers={[
+          { ...base, name: "anthropic", configured: true, circuit: "closed" },
+          { ...base, name: "offline", configured: true, circuit: "closed" },
+        ]}
+      />,
+    );
+    expect(screen.getByText("anthropic")).toBeInTheDocument();
+    expect(screen.queryByText("offline")).not.toBeInTheDocument();
+  });
 });
 
 describe("ChartCard", () => {

@@ -1,6 +1,12 @@
 import type { AgentEvent, AnalysisRecord, AnalysisSummary, ProviderStatus } from "./types";
 
+// An empty NEXT_PUBLIC_API_URL means the backend serves this page, so the API is on the same origin.
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+
+function wsBase(): string {
+  if (API_URL) return API_URL.replace(/^http/, "ws");
+  return `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -52,5 +58,5 @@ export const api = {
   cancel: (id: string) => request<{ id: string }>(`/api/analyses/${id}/cancel`, { method: "POST" }),
   remove: (id: string) => request<void>(`/api/analyses/${id}`, { method: "DELETE" }),
   exportUrl: (id: string, format: "md" | "html" | "json" | "csv") => `${API_URL}/api/analyses/${id}/export?format=${format}`,
-  wsUrl: (id: string) => `${API_URL.replace(/^http/, "ws")}/ws/analyses/${id}`,
+  wsUrl: (id: string) => `${wsBase()}/ws/analyses/${id}`,
 };

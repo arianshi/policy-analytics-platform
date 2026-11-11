@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # --- storage -----------------------------------------------------------
     data_dir: Path = BACKEND_DIR / "data"  # bundled snapshots + internal mock data (read-only)
     runtime_dir: Path = BACKEND_DIR / "var"  # sqlite db + http cache (read-write, a volume in Docker)
+    web_dir: Path | None = None  # built frontend (static export) to serve at /, for the single-image deploy
 
     # --- government data sources ------------------------------------------
     live_data: bool = True  # False -> never call the network, use cache/snapshots only

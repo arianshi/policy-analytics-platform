@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .api import routes, ws
@@ -91,6 +92,15 @@ def create_app(
 
     app.include_router(routes.router)
     app.include_router(ws.router)
+
+    @app.get("/healthz", include_in_schema=False)
+    async def healthz():  # liveness/readiness probe path the OpenShift Deployment uses
+        return {"status": "ok"}
+
+    # Single-image deploy: the same process serves the static frontend, so the API and WebSocket are same-origin.
+    # Mounted last so every API and WebSocket route above wins.
+    if settings.web_dir and settings.web_dir.is_dir():
+        app.mount("/", StaticFiles(directory=settings.web_dir, html=True), name="web")
     return app
 
 

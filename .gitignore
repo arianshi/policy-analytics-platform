@@ -13,3 +13,11 @@ node_modules
 .next
 *.tsbuildinfo
 .DS_Store
+frontend/out
+# Terraform: state and plans hold secrets (DB password, API keys); providers are re-downloaded by `terraform init`
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+terraform.tfvars
+.vercel
