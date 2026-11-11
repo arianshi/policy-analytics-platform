@@ -6,18 +6,18 @@ cited report. **Every number in the report is computed by code and then verified
 an LLM can narrate the results but cannot invent them.
 
 > **Try it with no API keys.** Without credentials the platform runs on a deterministic rule-based "offline model",
-> so the whole system, the demo and the test-suite work out of the box. Add OpenAI / Gemini / Azure OpenAI / AWS
-> Bedrock keys and those models take over, with automatic fallback between them.
+> so the whole system, the demo and the test-suite work out of the box. Add Anthropic (Claude) / OpenAI / Gemini / Azure
+> OpenAI / AWS Bedrock keys and those models take over, with automatic fallback between them.
 
 | | |
 |---|---|
 | **Agents** | Coordinator → Data Extraction → Analytics → Reporter (custom ReAct framework) |
 | **Data** | MOM via Data.gov.sg (CSV), DOS SingStat Table Builder (JSON API), internal Excel extract (MOCK) |
-| **LLMs** | OpenAI · Azure OpenAI · Google Gemini · AWS Bedrock · offline fallback, behind one router |
+| **LLMs** | Anthropic Claude · OpenAI · Azure OpenAI · Google Gemini · AWS Bedrock · offline fallback, behind one router |
 | **Stack** | FastAPI + SQLite + pandas/scipy · Next.js 16 / React 19 / TypeScript / Recharts |
 | **Quality** | 226 backend tests (95 % coverage) · 31 frontend tests · hallucination, accuracy, consistency, data-quality and load tests |
 
-Documents: [ARCHITECTURE.md](ARCHITECTURE.md) · [TESTING.md](TESTING.md) · [DATA_SOURCES.md](DATA_SOURCES.md) · [INNOVATION.md](INNOVATION.md) (Section 2 answer)
+Documents: [ARCHITECTURE.md](ARCHITECTURE.md) · [DATABASE.md](DATABASE.md) · [TESTING.md](TESTING.md) · [DATA_SOURCES.md](DATA_SOURCES.md) · [INNOVATION.md](INNOVATION.md) (Section 2 answer)
 
 ## What it does
 
@@ -58,8 +58,11 @@ Or `make setup`, `make backend`, `make frontend`. With Docker: `cp .env.example 
 (see *Verification status* below: the container files are written but could not be built on the authoring machine).
 
 ### Enabling real LLMs
-Copy `.env.example` to `backend/.env` and set any of `OPENAI_API_KEY`, `GEMINI_API_KEY`,
-`AZURE_OPENAI_*`, or `BEDROCK_ENABLED=true` (+ AWS credentials). Providers are tried in `LLM_PROVIDER_ORDER`; each
+Copy `.env.example` to `backend/.env` (or keep it as `.env` at the repo root and start the backend with
+`.venv/bin/uvicorn app.main:app --port 8000 --env-file ../.env`) and set any of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
+`GEMINI_API_KEY`, `AZURE_OPENAI_*`, or `BEDROCK_ENABLED=true` (+ AWS credentials). Claude defaults to `claude-opus-5-5`
+at `ANTHROPIC_EFFORT=low`; requests Claude's safety classifiers decline are re-run server-side on Anthropic's
+recommended fallback model. Providers are tried in `LLM_PROVIDER_ORDER`; each
 has a circuit breaker; invalid or hallucinated output also triggers fallback. `GET /api/providers` shows status and cost.
 
 ## Sample queries
@@ -92,9 +95,9 @@ See [TESTING.md](TESTING.md) for strategy, hallucination-detection methodology a
 
 | Choice | Why |
 |---|---|
-| **Custom ReAct framework** (no LangGraph/CrewAI) | The workflow is a small, well-defined graph; owning the loop made the failure handling (loop detection, premature-final rejection, step budgets, policy fallback) explicit, testable and dependency-free. See ARCHITECTURE.md §3. |
+| **Custom ReAct framework** (no LangGraph/CrewAI) | The workflow is a small, well-defined graph; owning the loop made the failure handling (loop detection, premature-final rejection, step budgets, policy fallback) explicit, testable and dependency-free. See [ARCHITECTURE.md §4](ARCHITECTURE.md#4-agent-design). |
 | **Facts-first design** (code computes, LLM narrates) | Makes hallucination detection tractable: every claim has a typed numeric source to be checked against. |
-| **FastAPI + asyncio tasks + SQLite** | Async API, WebSockets and background work in one process; SQLite keeps setup to zero. Repository layer is small so Postgres is a drop-in (see ARCHITECTURE.md §9). |
+| **FastAPI + asyncio tasks + SQLite** | Async API, WebSockets and background work in one process; SQLite keeps setup to zero. Repository layer is small so Postgres is a drop-in (see [ARCHITECTURE.md §10](ARCHITECTURE.md#10-design-decisions-and-trade-offs) and [DATABASE.md](DATABASE.md)). |
 | **pandas / scipy** | Standard, auditable statistics; results are cross-checked against independent recomputations in tests. |
 | **Next.js + Recharts** | Typed UI with server-side build output for a small Docker image; charts are rendered from a JSON spec the backend emits, so exports and UI share one source of truth. |
 | **httpx REST adapters for LLMs** | One thin adapter per provider (≈40 lines) instead of four heavy SDKs; trivially mockable for tests. Bedrock uses boto3's Converse API. |
