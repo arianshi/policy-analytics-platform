@@ -14,17 +14,33 @@ export function FactRefs({ ids, facts }: { ids: string[]; facts: Fact[] }) {
       {ids.map((id) => {
         const f = byId.get(id);
         return (
-          <button key={id} type="button" className={`chip fact ${open === id ? "on" : ""} ${f?.mock ? "mock" : ""}`} aria-expanded={open === id}
-            onClick={() => setOpen(open === id ? null : id)} title={f?.statement}>
-            {id}{f?.citations?.length ? ` · ${f.citations.join(",")}` : ""}
+          <button
+            key={id}
+            type="button"
+            className={`chip fact ${open === id ? "on" : ""} ${f?.mock ? "mock" : ""}`}
+            aria-expanded={open === id}
+            onClick={() => setOpen(open === id ? null : id)}
+            title={f?.statement}
+          >
+            {id}
+            {f?.citations?.length ? ` · ${f.citations.join(",")}` : ""}
           </button>
         );
       })}
       {sel && (
         <div className="factdetail" role="note">
           <p>{sel.statement}</p>
-          {sel.caveats.length > 0 && <ul className="small muted">{sel.caveats.map((c) => <li key={c}>{c}</li>)}</ul>}
-          <p className="small muted">Sources: {sel.sources.join(", ") || "-"}{sel.mock ? " · MOCK data" : ""}</p>
+          {sel.caveats.length > 0 && (
+            <ul className="small muted">
+              {sel.caveats.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          )}
+          <p className="small muted">
+            Sources: {sel.sources.join(", ") || "-"}
+            {sel.mock ? " · MOCK data" : ""}
+          </p>
         </div>
       )}
     </div>

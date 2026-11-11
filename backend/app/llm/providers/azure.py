@@ -10,7 +10,9 @@ class AzureOpenAIProvider(OpenAIProvider):
 
     name = "azure"
 
-    def __init__(self, endpoint: str, api_key: str, deployment: str, api_version: str, transport: httpx.AsyncBaseTransport | None = None):
+    def __init__(
+        self, endpoint: str, api_key: str, deployment: str, api_version: str, transport: httpx.AsyncBaseTransport | None = None
+    ):
         super().__init__(api_key, deployment, endpoint, transport)
         self.deployment, self.api_version = deployment, api_version
 

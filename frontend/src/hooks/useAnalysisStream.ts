@@ -6,7 +6,12 @@ import type { AgentEvent } from "@/lib/types";
 
 const POLL_MS = 1000;
 type Transport = "ws" | "polling" | "idle";
-interface State { id: string | null; events: AgentEvent[]; done: boolean; transport: Transport }
+interface State {
+  id: string | null;
+  events: AgentEvent[];
+  done: boolean;
+  transport: Transport;
+}
 const EMPTY: State = { id: null, events: [], done: false, transport: "idle" };
 
 /**
@@ -52,10 +57,18 @@ export function useAnalysisStream(id: string | null) {
       ws = new WebSocket(api.wsUrl(id));
       ws.onopen = () => setTransport("ws");
       ws.onmessage = (m) => {
-        try { accept(JSON.parse(m.data as string) as AgentEvent); } catch { /* ignore malformed frame */ }
+        try {
+          accept(JSON.parse(m.data as string) as AgentEvent);
+        } catch {
+          /* ignore malformed frame */
+        }
       };
-      ws.onerror = () => { ws?.close(); };
-      ws.onclose = () => { if (!closed && !finished) void poll(); };
+      ws.onerror = () => {
+        ws?.close();
+      };
+      ws.onclose = () => {
+        if (!closed && !finished) void poll();
+      };
     } catch {
       timer = setTimeout(poll, 0);
     }

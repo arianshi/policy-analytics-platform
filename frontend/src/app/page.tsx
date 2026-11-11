@@ -33,13 +33,25 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([api.listAnalyses(), api.providers()])
-      .then(([h, p]) => { if (!cancelled) { setHistory(h.items); setProviders(p.providers); } })
-      .catch((e) => { if (!cancelled) setFormError(e instanceof ApiError ? e.message : "Cannot load history"); });
-    return () => { cancelled = true; };
+      .then(([h, p]) => {
+        if (!cancelled) {
+          setHistory(h.items);
+          setProviders(p.providers);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) setFormError(e instanceof ApiError ? e.message : "Cannot load history");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [tick, done]);
 
   useEffect(() => {
-    api.samples().then((s) => setSamples(s.queries)).catch(() => undefined);
+    api
+      .samples()
+      .then((s) => setSamples(s.queries))
+      .catch(() => undefined);
   }, []);
 
   const submit = async (query: string, simulate: string[]) => {
@@ -49,7 +61,13 @@ export default function Home() {
       setSelected(id);
       refresh();
     } catch (e) {
-      setFormError(e instanceof ApiError ? (e.status === 429 ? "You're sending questions too quickly - please wait a moment." : e.message) : "Something went wrong");
+      setFormError(
+        e instanceof ApiError
+          ? e.status === 429
+            ? "You're sending questions too quickly - please wait a moment."
+            : e.message
+          : "Something went wrong",
+      );
     }
   };
 
@@ -60,7 +78,9 @@ export default function Home() {
       <header className="topbar">
         <div>
           <h1>Policy Data Analytics</h1>
-          <p className="muted small">Multi-agent analysis of Singapore labour-market data · every number is computed, cited and verified</p>
+          <p className="muted small">
+            Multi-agent analysis of Singapore labour-market data · every number is computed, cited and verified
+          </p>
         </div>
         <ProviderBar providers={providers} />
       </header>
@@ -68,15 +88,37 @@ export default function Home() {
       <aside className="sidebar" aria-label="Analysis history">
         <div className="row between">
           <h2>History</h2>
-          <button type="button" className="btn small" onClick={() => { setSelected(null); setPrefill(""); setFormKey((k) => k + 1); }}>New</button>
+          <button
+            type="button"
+            className="btn small"
+            onClick={() => {
+              setSelected(null);
+              setPrefill("");
+              setFormKey((k) => k + 1);
+            }}
+          >
+            New
+          </button>
         </div>
-        <HistoryList items={history} selected={selected} onSelect={setSelected}
-          onDelete={async (id) => { await api.remove(id).catch(() => undefined); if (id === selected) setSelected(null); refresh(); }} />
+        <HistoryList
+          items={history}
+          selected={selected}
+          onSelect={setSelected}
+          onDelete={async (id) => {
+            await api.remove(id).catch(() => undefined);
+            if (id === selected) setSelected(null);
+            refresh();
+          }}
+        />
       </aside>
 
       <main className="main">
         <QueryForm key={formKey} busy={running} samples={samples} onSubmit={submit} initialQuery={prefill} />
-        {formError && <p role="alert" className="error">{formError}</p>}
+        {formError && (
+          <p role="alert" className="error">
+            {formError}
+          </p>
+        )}
 
         {selected && (
           <>
@@ -85,7 +127,11 @@ export default function Home() {
                 {record ? <StatusBadge status={record.status} /> : <span className="muted small">Loading…</span>}
                 {record?.duration_ms != null && <span className="muted small">{formatDuration(record.duration_ms)}</span>}
               </div>
-              {running && <button type="button" className="btn small" onClick={() => void api.cancel(selected)}>Cancel</button>}
+              {running && (
+                <button type="button" className="btn small" onClick={() => void api.cancel(selected)}>
+                  Cancel
+                </button>
+              )}
             </div>
             <AgentTimeline events={events} running={running} transport={transport} />
           </>
@@ -97,16 +143,26 @@ export default function Home() {
             <p>{result.clarification.question}</p>
             <div className="chips">
               {result.clarification.suggestions.map((s) => (
-                <button key={s} className="chip" type="button" onClick={() => void submit(s, [])}>{s}</button>
+                <button key={s} className="chip" type="button" onClick={() => void submit(s, [])}>
+                  {s}
+                </button>
               ))}
             </div>
           </section>
         )}
-        {record?.status === "failed" && <p role="alert" className="error">The analysis failed: {record.error ?? result?.error ?? "unknown error"}</p>}
+        {record?.status === "failed" && (
+          <p role="alert" className="error">
+            The analysis failed: {record.error ?? result?.error ?? "unknown error"}
+          </p>
+        )}
         {record?.status === "degraded" && result && result.warnings.length > 0 && (
           <aside className="notice" aria-label="Fallbacks used">
             <strong>Completed with fallbacks — disclosed in the report</strong>
-            <ul>{result.warnings.slice(0, 6).map((w) => <li key={w}>{w}</li>)}</ul>
+            <ul>
+              {result.warnings.slice(0, 6).map((w) => (
+                <li key={w}>{w}</li>
+              ))}
+            </ul>
           </aside>
         )}
         {selected && result?.report && <ResultTabs id={selected} result={result} />}

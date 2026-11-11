@@ -29,9 +29,13 @@ _NUM = re.compile(
 )
 _OTHER_AGENCIES = re.compile(
     r"\b(IRAS|Inland Revenue|CPF Board|IMDA|MAS|Monetary Authority|URA|HDB|EDB|Economic Development Board|World Bank|IMF|OECD|"
-    r"Ministry of Finance|MOF|Statista|Bloomberg|Reuters|LinkedIn|Glassdoor|Gartner|McKinsey)\b")
-_CAUSAL = re.compile(r"\b(caused|causes|causing|because of|due to|as a result of|resulting from|driven by|led to|leading to|thanks to|attributable to|"
-                     r"proves?|proven|demonstrates? that)\b", re.IGNORECASE)
+    r"Ministry of Finance|MOF|Statista|Bloomberg|Reuters|LinkedIn|Glassdoor|Gartner|McKinsey)\b"
+)
+_CAUSAL = re.compile(
+    r"\b(caused|causes|causing|because of|due to|as a result of|resulting from|driven by|led to|leading to|thanks to|attributable to|"
+    r"proves?|proven|demonstrates? that)\b",
+    re.IGNORECASE,
+)
 _MOCK_OK = re.compile(r"mock|synthetic|illustrative", re.IGNORECASE)
 
 
@@ -148,13 +152,15 @@ def verify_items(items: list[Item], store: FactStore, ctx: VerifyContext) -> Ver
             issues.append(Issue("error", "uncited_claim", it.label, it.text[:80], "no supporting fact cited"))
         text = _FACT_REF.sub(" ", it.text)
         if any(f.mock for f in facts) and not _MOCK_OK.search(text):
-            issues.append(Issue("error", "mock_unlabelled", it.label, it.text[:80], "narrates MOCK data without labelling it as synthetic"))
+            issues.append(
+                Issue("error", "mock_unlabelled", it.label, it.text[:80], "narrates MOCK data without labelling it as synthetic")
+            )
         cited_years = set().union(*[_years_in_fact(f) for f in facts]) if facts else set()
         for m in _NUM.finditer(text):
             raw, unit, money = m.group("num"), m.group("unit"), bool(m.group("money"))
             n = float(raw.replace(",", ""))
             d = _decimals(raw)
-            snippet = text[max(0, m.start() - 12): m.end() + 12].strip()
+            snippet = text[max(0, m.start() - 12) : m.end() + 12].strip()
             if unit is None and not money and "," not in raw and d == 0 and 1900 <= n <= 2100:  # a year
                 y = int(n)
                 lo, hi = ctx.coverage
@@ -170,11 +176,19 @@ def verify_items(items: list[Item], store: FactStore, ctx: VerifyContext) -> Ver
             if hit is None:
                 issues.append(Issue("error", "unsupported_number", it.label, snippet, "not found in the cited facts"))
             elif hit == "derived":
-                issues.append(Issue("info", "derived_number", it.label, snippet, "computed from cited values; not stated directly"))
+                issues.append(
+                    Issue("info", "derived_number", it.label, snippet, "computed from cited values; not stated directly")
+                )
         for m in _OTHER_AGENCIES.finditer(text):
-            issues.append(Issue("error", "unsupported_source", it.label, m.group(0), "agency/source was not used in this analysis"))
+            issues.append(
+                Issue("error", "unsupported_source", it.label, m.group(0), "agency/source was not used in this analysis")
+            )
         for m in _CAUSAL.finditer(text):
-            issues.append(Issue("warning", "causal_claim", it.label, m.group(0), "causal wording; the analysis is descriptive/correlational"))
+            issues.append(
+                Issue(
+                    "warning", "causal_claim", it.label, m.group(0), "causal wording; the analysis is descriptive/correlational"
+                )
+            )
     errors = sum(1 for i in issues if i.severity == "error")
     denom = max(1, numbers_checked + len(items))
     return VerificationResult(errors == 0, len(items), numbers_checked, round(max(0.0, 1 - errors / denom), 3), issues)

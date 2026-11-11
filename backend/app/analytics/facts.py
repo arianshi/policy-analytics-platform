@@ -48,12 +48,33 @@ class FactStore:
     def __init__(self) -> None:
         self._facts: list[Fact] = []
 
-    def add(self, kind: str, statement: str, *, sector: str | None = None, metric: str | None = None,
-            period: tuple[int, int] | None = None, values: dict[str, FactValue] | None = None,
-            sources: list[str] | None = None, caveats: list[str] | None = None, importance: float = 0.5,
-            mock: bool = False) -> Fact:
-        fact = Fact(f"F{len(self._facts) + 1}", kind, sector, metric, period, statement, values or {},
-                    sources or [], caveats or [], importance, mock)
+    def add(
+        self,
+        kind: str,
+        statement: str,
+        *,
+        sector: str | None = None,
+        metric: str | None = None,
+        period: tuple[int, int] | None = None,
+        values: dict[str, FactValue] | None = None,
+        sources: list[str] | None = None,
+        caveats: list[str] | None = None,
+        importance: float = 0.5,
+        mock: bool = False,
+    ) -> Fact:
+        fact = Fact(
+            f"F{len(self._facts) + 1}",
+            kind,
+            sector,
+            metric,
+            period,
+            statement,
+            values or {},
+            sources or [],
+            caveats or [],
+            importance,
+            mock,
+        )
         self._facts.append(fact)
         return fact
 

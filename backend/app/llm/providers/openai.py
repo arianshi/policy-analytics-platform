@@ -18,7 +18,8 @@ class OpenAIProvider(LLMProvider):
     def _body(self, req: LLMRequest) -> dict:
         body = {
             "messages": [{"role": "system", "content": req.system}, {"role": "user", "content": req.prompt}],
-            "temperature": req.temperature, "max_tokens": req.max_tokens,
+            "temperature": req.temperature,
+            "max_tokens": req.max_tokens,
         }
         if req.json_mode:
             body["response_format"] = {"type": "json_object"}

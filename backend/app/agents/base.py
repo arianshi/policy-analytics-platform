@@ -76,19 +76,25 @@ class ReActAgent:
     def emit(self, type_: str, message: str, data: dict[str, Any] | None = None) -> None:
         self.ctx.emit(self.name, type_, message, data)
 
-    def add_tool(self, name: str, description: str, params: str, fn: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]) -> None:
+    def add_tool(
+        self, name: str, description: str, params: str, fn: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
+    ) -> None:
         self.tools[name] = Tool(name, description, params, fn)
 
     def _system(self) -> str:
-        return (f"You are the {self.name} agent in a multi-agent policy-analytics system. {self.role}\n"
-                "Use the ReAct pattern: reason about the current STATE, then take exactly ONE action. "
-                'Reply ONLY with JSON: {"thought": "<short reasoning>", "action": {"tool": "<name>", "args": {...}}} '
-                'or, when the goal is complete, {"thought": "...", "final": {...}}.')
+        return (
+            f"You are the {self.name} agent in a multi-agent policy-analytics system. {self.role}\n"
+            "Use the ReAct pattern: reason about the current STATE, then take exactly ONE action. "
+            'Reply ONLY with JSON: {"thought": "<short reasoning>", "action": {"tool": "<name>", "args": {...}}} '
+            'or, when the goal is complete, {"thought": "...", "final": {...}}.'
+        )
 
     def _prompt(self, state: dict[str, Any]) -> str:
         tools = "\n".join(f"- {t.name}({t.params}): {t.description}" for t in self.tools.values())
-        recent = "\n".join(f"[{i}] thought: {e['thought']}\n    action: {e['tool']}({json.dumps(e['args'])[:160]})\n    observation: {e['obs'][:400]}"
-                           for i, e in enumerate(self.scratch[-4:], max(1, len(self.scratch) - 3)))
+        recent = "\n".join(
+            f"[{i}] thought: {e['thought']}\n    action: {e['tool']}({json.dumps(e['args'])[:160]})\n    observation: {e['obs'][:400]}"
+            for i, e in enumerate(self.scratch[-4:], max(1, len(self.scratch) - 3))
+        )
         return f"GOAL: {self.goal()}\nTOOLS:\n{tools}\nSTATE:\n{json.dumps(state, default=str)[:3000]}\nRECENT STEPS:\n{recent or '(none yet)'}"
 
     def _parse_decision(self, text: str) -> dict[str, Any]:
@@ -110,14 +116,23 @@ class ReActAgent:
     async def _next_action(self, state: dict[str, Any]) -> dict[str, Any]:
         if self.llm_unavailable:
             return self.policy(state)
-        req = LLMRequest(task="react_step", system=self._system(), prompt=self._prompt(state), max_tokens=500,
-                         context={"agent": self.name, "state": state}, validator=self._parse_decision)
+        req = LLMRequest(
+            task="react_step",
+            system=self._system(),
+            prompt=self._prompt(state),
+            max_tokens=500,
+            context={"agent": self.name, "state": state},
+            validator=self._parse_decision,
+        )
         try:
             resp = await self.ctx.llm(self.name, req)
             return resp.parsed
         except LLMError as exc:
             self.llm_unavailable = True
-            self.ctx.warn(self.name, f"No LLM provider could plan the next step ({exc}); using the rule-based policy for the rest of this task")
+            self.ctx.warn(
+                self.name,
+                f"No LLM provider could plan the next step ({exc}); using the rule-based policy for the rest of this task",
+            )
             return self.policy(state)
 
     # --- main loop -----------------------------------------------------------
@@ -161,7 +176,18 @@ class ReActAgent:
             self.emit("action", f"{tool}({_brief(args)})", {"tool": tool, "args": args, "step": step})
             obs, ok = await self._execute(tool, args)
             summary = json.dumps(obs, default=str)
-            self.emit("observation", _observation_text(tool, obs, ok), {"tool": tool, "ok": ok, "result": json.loads(summary[:OBS_LIMIT]) if len(summary) <= OBS_LIMIT else {"truncated": summary[:OBS_LIMIT]}, "step": step})
+            self.emit(
+                "observation",
+                _observation_text(tool, obs, ok),
+                {
+                    "tool": tool,
+                    "ok": ok,
+                    "result": json.loads(summary[:OBS_LIMIT])
+                    if len(summary) <= OBS_LIMIT
+                    else {"truncated": summary[:OBS_LIMIT]},
+                    "step": step,
+                },
+            )
             self.scratch.append({"thought": thought, "tool": tool, "args": args, "obs": summary[:OBS_LIMIT]})
         self.emit("warning", f"{self.name} hit its step budget ({self.max_steps}) without finishing", {})
         return AgentResult("incomplete", {"status": "incomplete"}, self.max_steps, "step budget exhausted")

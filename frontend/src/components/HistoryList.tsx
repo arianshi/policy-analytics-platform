@@ -18,10 +18,19 @@ export function HistoryList({ items, selected, onSelect, onDelete, now }: Props)
         <li key={a.id} className={a.id === selected ? "on" : ""}>
           <button type="button" className="hist-main" onClick={() => onSelect(a.id)} aria-current={a.id === selected}>
             <span className="hist-title">{a.title ?? a.query}</span>
-            <span className="small muted">{timeAgo(a.created_at, now)} · {a.facts} facts</span>
+            <span className="small muted">
+              {timeAgo(a.created_at, now)} · {a.facts} facts
+            </span>
             <StatusBadge status={a.status} />
           </button>
-          <button type="button" className="icon" aria-label={`Delete analysis: ${a.title ?? a.query}`} onClick={() => onDelete(a.id)}>×</button>
+          <button
+            type="button"
+            className="icon"
+            aria-label={`Delete analysis: ${a.title ?? a.query}`}
+            onClick={() => onDelete(a.id)}
+          >
+            ×
+          </button>
         </li>
       ))}
     </ul>

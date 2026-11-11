@@ -50,8 +50,18 @@ class AnalysisService:
             emit("system", "status", "Queued - waiting for a free worker" if self._sem.locked() else "Starting", {})
             async with self._sem:
                 self.db.set_status(analysis_id, "running")
-                ctx = RunContext(analysis_id, query, self.s, self.registry, self.router, faults, emit, datetime.now(UTC).year,
-                                 CostTracker(self.s.llm_budget_usd), persist_dataset=self.db.store_dataset)
+                ctx = RunContext(
+                    analysis_id,
+                    query,
+                    self.s,
+                    self.registry,
+                    self.router,
+                    faults,
+                    emit,
+                    datetime.now(UTC).year,
+                    CostTracker(self.s.llm_budget_usd),
+                    persist_dataset=self.db.store_dataset,
+                )
                 result = await asyncio.wait_for(run_analysis(ctx), timeout=self.s.analysis_timeout_s)
             self.db.save_result(analysis_id, result["status"], result, result.get("error", ""))
             emit("system", "done", f"Analysis {result['status']}", {"status": result["status"]})

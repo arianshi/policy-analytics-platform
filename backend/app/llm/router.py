@@ -84,20 +84,35 @@ class CostTracker:
             by_provider[c["provider"]] = by_provider.get(c["provider"], 0) + 1
         fallbacks = [c for c in self.calls if not c.get("ok")]
         return {
-            "calls": len(ok), "failed_attempts": len(fallbacks), "input_tokens": sum(c.get("input_tokens", 0) for c in ok),
-            "output_tokens": sum(c.get("output_tokens", 0) for c in ok), "cost_usd": self.cost_usd, "by_provider": by_provider,
-            "fallback_events": [{"task": c["task"], "provider": c["provider"], "error": c.get("error", "")} for c in fallbacks][:20],
+            "calls": len(ok),
+            "failed_attempts": len(fallbacks),
+            "input_tokens": sum(c.get("input_tokens", 0) for c in ok),
+            "output_tokens": sum(c.get("output_tokens", 0) for c in ok),
+            "cost_usd": self.cost_usd,
+            "by_provider": by_provider,
+            "fallback_events": [{"task": c["task"], "provider": c["provider"], "error": c.get("error", "")} for c in fallbacks][
+                :20
+            ],
         }
 
 
 class LLMRouter:
-    def __init__(self, providers: list[LLMProvider], settings: Settings, *, recorder: Callable[[dict[str, Any]], None] | None = None,
-                 clock: Callable[[], float] = time.monotonic, sleep=asyncio.sleep):
+    def __init__(
+        self,
+        providers: list[LLMProvider],
+        settings: Settings,
+        *,
+        recorder: Callable[[dict[str, Any]], None] | None = None,
+        clock: Callable[[], float] = time.monotonic,
+        sleep=asyncio.sleep,
+    ):
         self.providers = providers
         self.s = settings
         self.recorder = recorder
         self._sleep = sleep
-        self.breakers = {p.name: Breaker(settings.llm_breaker_threshold, settings.llm_breaker_cooldown_s, clock) for p in providers}
+        self.breakers = {
+            p.name: Breaker(settings.llm_breaker_threshold, settings.llm_breaker_cooldown_s, clock) for p in providers
+        }
         self.stats = {p.name: ProviderStats() for p in providers}
 
     # ---------------------------------------------------------------- public
@@ -105,13 +120,34 @@ class LLMRouter:
         out = []
         for p in self.providers:
             st, br = self.stats[p.name], self.breakers[p.name]
-            out.append({"name": p.name, "model": p.model, "configured": p.configured(), "circuit": br.state, "calls": st.calls, "failures": st.failures,
-                        "skipped": st.skipped, "cost_usd": round(st.cost_usd, 6), "input_tokens": st.input_tokens, "output_tokens": st.output_tokens,
-                        "avg_latency_ms": int(st.latency_ms_total / st.calls) if st.calls else 0, "last_error": st.last_error})
+            out.append(
+                {
+                    "name": p.name,
+                    "model": p.model,
+                    "configured": p.configured(),
+                    "circuit": br.state,
+                    "calls": st.calls,
+                    "failures": st.failures,
+                    "skipped": st.skipped,
+                    "cost_usd": round(st.cost_usd, 6),
+                    "input_tokens": st.input_tokens,
+                    "output_tokens": st.output_tokens,
+                    "avg_latency_ms": int(st.latency_ms_total / st.calls) if st.calls else 0,
+                    "last_error": st.last_error,
+                }
+            )
         return out
 
-    async def complete(self, req: LLMRequest, *, agent: str = "llm", emit: Emit | None = None, tracker: CostTracker | None = None,
-                       faults: FaultPlan | None = None, analysis_id: str | None = None) -> LLMResponse:
+    async def complete(
+        self,
+        req: LLMRequest,
+        *,
+        agent: str = "llm",
+        emit: Emit | None = None,
+        tracker: CostTracker | None = None,
+        faults: FaultPlan | None = None,
+        analysis_id: str | None = None,
+    ) -> LLMResponse:
         faults = faults or FaultPlan()
         tracker = tracker or CostTracker(self.s.llm_budget_usd)
         tried: list[dict[str, str]] = []
@@ -137,23 +173,41 @@ class LLMRouter:
             try:
                 resp = await self._call(p, req, faults, tracker, analysis_id, agent)
             except LLMError as exc:
-                if not isinstance(exc, InvalidOutput):  # bad *format* is not an outage: fall back for this request, keep the circuit closed
+                if not isinstance(
+                    exc, InvalidOutput
+                ):  # bad *format* is not an outage: fall back for this request, keep the circuit closed
                     br.failure()
                 st.failures += 1
                 st.last_error = str(exc)[:200]
                 tried.append({"provider": p.name, "error": str(exc)[:160]})
-                say("warning", f"{p.name} failed ({exc}); falling back to the next provider", {"provider": p.name, "task": req.task})
+                say(
+                    "warning",
+                    f"{p.name} failed ({exc}); falling back to the next provider",
+                    {"provider": p.name, "task": req.task},
+                )
                 continue
             br.success()
             resp.fallbacks = tried
-            say("llm", f"{req.task} answered by {p.name}/{p.model}", {"provider": p.name, "model": p.model, "tokens_in": resp.input_tokens,
-                                                                       "tokens_out": resp.output_tokens, "cost_usd": resp.cost_usd, "latency_ms": resp.latency_ms,
-                                                                       "fallbacks": len(tried)})
+            say(
+                "llm",
+                f"{req.task} answered by {p.name}/{p.model}",
+                {
+                    "provider": p.name,
+                    "model": p.model,
+                    "tokens_in": resp.input_tokens,
+                    "tokens_out": resp.output_tokens,
+                    "cost_usd": resp.cost_usd,
+                    "latency_ms": resp.latency_ms,
+                    "fallbacks": len(tried),
+                },
+            )
             return resp
         raise LLMError("all LLM providers failed: " + "; ".join(f"{t['provider']}: {t['error']}" for t in tried))
 
     # --------------------------------------------------------------- internals
-    async def _call(self, p: LLMProvider, req: LLMRequest, faults: FaultPlan, tracker: CostTracker, analysis_id: str | None, agent: str) -> LLMResponse:
+    async def _call(
+        self, p: LLMProvider, req: LLMRequest, faults: FaultPlan, tracker: CostTracker, analysis_id: str | None, agent: str
+    ) -> LLMResponse:
         st = self.stats[p.name]
         attempts = 1 + max(0, self.s.llm_max_retries)
         last: LLMError | None = None
@@ -182,7 +236,9 @@ class LLMRouter:
                 return LLMResponse(comp.text, parsed, p.name, p.model, tin, tout, cost, latency)
             except LLMError as exc:
                 last = exc
-                self._record(tracker, analysis_id, agent, req, p, 0, 0, 0.0, int((time.perf_counter() - t0) * 1000), False, str(exc)[:200])
+                self._record(
+                    tracker, analysis_id, agent, req, p, 0, 0, 0.0, int((time.perf_counter() - t0) * 1000), False, str(exc)[:200]
+                )
                 if exc.transient and attempt < attempts - 1:
                     await self._sleep(min(0.5 * (2**attempt), 4.0))
                     continue
@@ -191,8 +247,19 @@ class LLMRouter:
         raise last
 
     def _record(self, tracker: CostTracker, analysis_id, agent, req, p, tin, tout, cost, latency, ok, error) -> None:
-        rec = {"analysis_id": analysis_id, "agent": agent, "task": req.task, "provider": p.name, "model": p.model, "input_tokens": tin,
-               "output_tokens": tout, "cost_usd": cost, "latency_ms": latency, "ok": ok, "error": error}
+        rec = {
+            "analysis_id": analysis_id,
+            "agent": agent,
+            "task": req.task,
+            "provider": p.name,
+            "model": p.model,
+            "input_tokens": tin,
+            "output_tokens": tout,
+            "cost_usd": cost,
+            "latency_ms": latency,
+            "ok": ok,
+            "error": error,
+        }
         tracker.add(rec)
         if self.recorder:
             try:
@@ -214,7 +281,7 @@ def parse_json_object(text: str) -> dict[str, Any]:
         if start < 0 or end <= start:
             raise ValueError("no JSON object in output") from None
         try:
-            obj = json.loads(t[start:end + 1])
+            obj = json.loads(t[start : end + 1])
         except ValueError as exc:
             raise ValueError(f"malformed JSON: {exc}") from None
     if not isinstance(obj, dict):

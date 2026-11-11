@@ -51,7 +51,9 @@ def test_full_analysis_lifecycle(client):
     assert len(r["facts"]) >= 30 and len(r["charts"]) >= 10 and len(r["datasets"]) == 10 and r["verification"]["passed"]
     assert r["report"]["findings"] and r["report"]["citations"] and r["intent"]["sectors"] == ["ict"]
     listing = client.get("/api/analyses").json()["items"]
-    assert listing[0]["id"] == aid and listing[0]["title"].startswith("Information & Communications") and "result" not in listing[0]
+    assert (
+        listing[0]["id"] == aid and listing[0]["title"].startswith("Information & Communications") and "result" not in listing[0]
+    )
 
 
 def test_events_are_ordered_and_cover_all_four_agents(client):
@@ -95,20 +97,38 @@ def test_websocket_replays_history_for_finished_analysis_and_rejects_unknown(cli
         assert ws.receive_json()["type"] == "error"
 
 
-@pytest.mark.parametrize("fmt,ctype,needle", [("md", "text/markdown", "## Key findings"), ("json", "application/json", '"facts"'),
-                                              ("csv", "text/csv", "fact_id,kind"), ("html", "text/html", "<h1>")])
+@pytest.mark.parametrize(
+    "fmt,ctype,needle",
+    [
+        ("md", "text/markdown", "## Key findings"),
+        ("json", "application/json", '"facts"'),
+        ("csv", "text/csv", "fact_id,kind"),
+        ("html", "text/html", "<h1>"),
+    ],
+)
 def test_export_formats(client, fmt, ctype, needle):
     aid = post(client)
     wait_done(client, aid)
     r = client.get(f"/api/analyses/{aid}/export", params={"format": fmt})
-    assert r.status_code == 200 and r.headers["content-type"].startswith(ctype) and needle in r.text and "attachment" in r.headers["content-disposition"]
+    assert (
+        r.status_code == 200
+        and r.headers["content-type"].startswith(ctype)
+        and needle in r.text
+        and "attachment" in r.headers["content-disposition"]
+    )
 
 
 def test_markdown_export_is_cited_and_discloses_mock_data(client):
     aid = post(client)
     wait_done(client, aid)
     md = client.get(f"/api/analyses/{aid}/export?format=md").text
-    assert "## Sources" in md and "[MOCK]" in md and "data.gov.sg" in md.lower() and "Hallucination check: passed" in md and "[S1" in md
+    assert (
+        "## Sources" in md
+        and "[MOCK]" in md
+        and "data.gov.sg" in md.lower()
+        and "Hallucination check: passed" in md
+        and "[S1" in md
+    )
 
 
 def test_invalid_requests_get_structured_errors(client):
@@ -134,12 +154,20 @@ def test_export_requires_a_finished_report(client):
 def test_ambiguous_question_returns_clarification_not_a_guess(client):
     rec = wait_done(client, post(client, "tell me something interesting"))
     assert rec["status"] == "needs_clarification"
-    assert rec["result"]["clarification"]["question"] and rec["result"]["clarification"]["suggestions"] and rec["result"]["datasets"] == []
+    assert (
+        rec["result"]["clarification"]["question"]
+        and rec["result"]["clarification"]["suggestions"]
+        and rec["result"]["datasets"] == []
+    )
 
 
 def test_simulated_failure_via_api_degrades_gracefully(client):
     rec = wait_done(client, post(client, simulate_failures=["source:internal"]))
-    assert rec["status"] == "degraded" and rec["result"]["skipped_datasets"] == ["internal.tech_programmes"] and rec["result"]["verification"]["passed"]
+    assert (
+        rec["status"] == "degraded"
+        and rec["result"]["skipped_datasets"] == ["internal.tech_programmes"]
+        and rec["result"]["verification"]["passed"]
+    )
     assert any("internal" in w for w in rec["result"]["warnings"])
 
 

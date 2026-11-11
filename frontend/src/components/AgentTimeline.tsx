@@ -19,15 +19,29 @@ export function agentStates(events: AgentEvent[], running: boolean): Record<Agen
 }
 
 const LABEL: Record<string, string> = {
-  thought: "Thinks", action: "Acts", observation: "Observes", delegation: "Delegates", warning: "Warning", error: "Error",
-  status: "Status", result: "Finished", llm: "LLM", done: "Done",
+  thought: "Thinks",
+  action: "Acts",
+  observation: "Observes",
+  delegation: "Delegates",
+  warning: "Warning",
+  error: "Error",
+  status: "Status",
+  result: "Finished",
+  llm: "LLM",
+  done: "Done",
 };
 
 function Args({ data }: { data: Record<string, unknown> }) {
   const args = data.args as Record<string, unknown> | undefined;
   if (!args || !Object.keys(args).length) return null;
-  const text = Object.entries(args).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ");
-  return <code className="args" title={text}>{text.length > 140 ? `${text.slice(0, 138)}…` : text}</code>;
+  const text = Object.entries(args)
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    .join(", ");
+  return (
+    <code className="args" title={text}>
+      {text.length > 140 ? `${text.slice(0, 138)}…` : text}
+    </code>
+  );
 }
 
 export function AgentTimeline({ events, running, transport }: { events: AgentEvent[]; running: boolean; transport?: string }) {
@@ -35,7 +49,9 @@ export function AgentTimeline({ events, running, transport }: { events: AgentEve
   const [only, setOnly] = useState<string>("all");
   const endRef = useRef<HTMLDivElement>(null);
   const states = agentStates(events, running);
-  const visible = events.filter((e) => (showLlm || e.type !== "llm") && e.type !== "ping" && (only === "all" || e.agent === only));
+  const visible = events.filter(
+    (e) => (showLlm || e.type !== "llm") && e.type !== "ping" && (only === "all" || e.agent === only),
+  );
 
   useEffect(() => {
     if (running) endRef.current?.scrollIntoView?.({ block: "nearest" });
@@ -50,21 +66,36 @@ export function AgentTimeline({ events, running, transport }: { events: AgentEve
       <ol className="agent-strip" aria-label="Agent status">
         {AGENTS.map((a) => (
           <li key={a}>
-            <button type="button" className={`agent agent-${a} state-${states[a]} ${only === a ? "selected" : ""}`} onClick={() => setOnly(only === a ? "all" : a)}
-              aria-pressed={only === a} title={`Show only ${a}`}>
-              <span className="dot" aria-hidden />{a}<span className="sr-only"> {states[a]}</span>
+            <button
+              type="button"
+              className={`agent agent-${a} state-${states[a]} ${only === a ? "selected" : ""}`}
+              onClick={() => setOnly(only === a ? "all" : a)}
+              aria-pressed={only === a}
+              title={`Show only ${a}`}
+            >
+              <span className="dot" aria-hidden />
+              {a}
+              <span className="sr-only"> {states[a]}</span>
             </button>
           </li>
         ))}
       </ol>
-      <label className="small muted check"><input type="checkbox" checked={showLlm} onChange={(e) => setShowLlm(e.target.checked)} /> Show LLM calls</label>
+      <label className="small muted check">
+        <input type="checkbox" checked={showLlm} onChange={(e) => setShowLlm(e.target.checked)} /> Show LLM calls
+      </label>
       <ol className="events" data-testid="events">
         {visible.length === 0 && <li className="muted small">Waiting for the first agent step…</li>}
         {visible.map((e) => (
-          <li key={e.seq} className={`event type-${e.type} agent-${e.agent} ${e.type === "observation" && e.data.ok === false ? "failed" : ""}`}>
+          <li
+            key={e.seq}
+            className={`event type-${e.type} agent-${e.agent} ${e.type === "observation" && e.data.ok === false ? "failed" : ""}`}
+          >
             <span className="who">{e.agent}</span>
             <span className="kind">{LABEL[e.type] ?? e.type}</span>
-            <span className="msg">{e.message}{e.type === "action" && <Args data={e.data} />}</span>
+            <span className="msg">
+              {e.message}
+              {e.type === "action" && <Args data={e.data} />}
+            </span>
           </li>
         ))}
       </ol>

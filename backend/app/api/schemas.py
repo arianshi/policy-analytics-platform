@@ -5,8 +5,11 @@ from pydantic import BaseModel, Field, field_validator
 
 class AnalysisRequest(BaseModel):
     query: str = Field(min_length=3, max_length=600, description="Natural-language research question")
-    simulate_failures: list[str] = Field(default_factory=list, max_length=6,
-                                         description="Demo/test only: e.g. 'source:mom:rate_limited', 'source:singstat:schema', 'source:internal', 'llm:openai'")
+    simulate_failures: list[str] = Field(
+        default_factory=list,
+        max_length=6,
+        description="Demo/test only: e.g. 'source:mom:rate_limited', 'source:singstat:schema', 'source:internal', 'llm:openai'",
+    )
 
     @field_validator("query")
     @classmethod

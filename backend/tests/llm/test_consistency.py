@@ -38,12 +38,20 @@ def test_different_questions_give_the_same_underlying_numbers(module_settings):
     b = asyncio.run(run_analysis(make_ctx(module_settings, query="How did ICT headcount change between 2020 and 2024?")))
 
     def growth(r):
-        return next(f for f in r["facts"] if f["kind"] == "growth" and f["metric"] == "employed_residents" and f["sector"] == "ict")["values"]
+        return next(
+            f for f in r["facts"] if f["kind"] == "growth" and f["metric"] == "employed_residents" and f["sector"] == "ict"
+        )["values"]
 
     assert growth(a) == growth(b)
 
 
 def test_number_of_findings_is_stable_across_sectors(module_settings):
-    counts = {s: len(asyncio.run(run_analysis(make_ctx(module_settings, query=f"Analyse employment trends in the {s} sector from 2020-2024")))["facts"])
-              for s in ("technology", "finance", "manufacturing")}
+    counts = {
+        s: len(
+            asyncio.run(
+                run_analysis(make_ctx(module_settings, query=f"Analyse employment trends in the {s} sector from 2020-2024"))
+            )["facts"]
+        )
+        for s in ("technology", "finance", "manufacturing")
+    }
     assert all(n >= 25 for n in counts.values()), counts

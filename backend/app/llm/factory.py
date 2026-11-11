@@ -17,7 +17,9 @@ def build_providers(s: Settings, *, transport: httpx.AsyncBaseTransport | None =
         "openai": OpenAIProvider(s.openai_api_key, s.openai_model, s.openai_base_url, transport),
         "gemini": GeminiProvider(s.gemini_api_key, s.gemini_model, s.gemini_base_url, transport),
         "bedrock": BedrockProvider(s.bedrock_enabled, s.bedrock_model_id, s.aws_region),
-        "azure": AzureOpenAIProvider(s.azure_openai_endpoint, s.azure_openai_api_key, s.azure_openai_deployment, s.azure_openai_api_version, transport),
+        "azure": AzureOpenAIProvider(
+            s.azure_openai_endpoint, s.azure_openai_api_key, s.azure_openai_deployment, s.azure_openai_api_version, transport
+        ),
         "offline": OfflineProvider(),
     }
     ordered = [available[n] for n in s.provider_order if n in available]

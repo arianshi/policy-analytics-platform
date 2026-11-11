@@ -20,22 +20,51 @@ export function ResultTabs({ id, result }: { id: string; result: AnalysisResult 
       <div className="row between wrap">
         <div role="tablist" aria-label="Result sections" className="tabs">
           {TABS.map((t) => (
-            <button key={t} role="tab" id={`tab-${t}`} aria-selected={tab === t} aria-controls="tabpanel" className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t}</button>
+            <button
+              key={t}
+              role="tab"
+              id={`tab-${t}`}
+              aria-selected={tab === t}
+              aria-controls="tabpanel"
+              className={tab === t ? "on" : ""}
+              onClick={() => setTab(t)}
+            >
+              {t}
+            </button>
           ))}
         </div>
         <div className="exports" aria-label="Export">
-          {(["md", "html", "json", "csv"] as const).map((f) => <a key={f} className="btn small" href={api.exportUrl(id, f)} download>{f.toUpperCase()}</a>)}
+          {(["md", "html", "json", "csv"] as const).map((f) => (
+            <a key={f} className="btn small" href={api.exportUrl(id, f)} download>
+              {f.toUpperCase()}
+            </a>
+          ))}
         </div>
       </div>
       <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${tab}`} className="panel">
         {tab === "Summary" && <SummaryView result={result} />}
-        {tab === "Charts" && (result.charts.length ? <div className="grid2">{result.charts.map((c) => <ChartCard key={c.id} spec={c} />)}</div> : <p className="muted">No charts.</p>)}
+        {tab === "Charts" &&
+          (result.charts.length ? (
+            <div className="grid2">
+              {result.charts.map((c) => (
+                <ChartCard key={c.id} spec={c} />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">No charts.</p>
+          ))}
         {tab === "Data quality" && <DataQualityView result={result} />}
         {tab === "Sources" && result.report && <SourcesView citations={result.report.citations} />}
         {tab === "Facts" && (
           <>
-            <label className="small muted" htmlFor="kind">Filter by kind </label>
-            <select id="kind" value={kind} onChange={(e) => setKind(e.target.value)}>{kinds.map((k) => <option key={k}>{k}</option>)}</select>
+            <label className="small muted" htmlFor="kind">
+              Filter by kind{" "}
+            </label>
+            <select id="kind" value={kind} onChange={(e) => setKind(e.target.value)}>
+              {kinds.map((k) => (
+                <option key={k}>{k}</option>
+              ))}
+            </select>
             <FactsView facts={result.facts} filter={kind} />
           </>
         )}

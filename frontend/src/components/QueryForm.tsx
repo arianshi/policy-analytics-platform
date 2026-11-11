@@ -33,7 +33,9 @@ export function QueryForm({ busy, samples, onSubmit, initialQuery = "" }: Props)
         if (valid && !busy) onSubmit(trimmed, failure ? [failure] : []);
       }}
     >
-      <label htmlFor="query" className="label">Research question</label>
+      <label htmlFor="query" className="label">
+        Research question
+      </label>
       <textarea
         id="query"
         value={query}
@@ -51,17 +53,27 @@ export function QueryForm({ busy, samples, onSubmit, initialQuery = "" }: Props)
             </button>
           ))}
         </div>
-        <span className="muted small" aria-live="polite">{trimmed.length}/{MAX_QUERY}</span>
+        <span className="muted small" aria-live="polite">
+          {trimmed.length}/{MAX_QUERY}
+        </span>
       </div>
       <details className="demo">
         <summary>Demo: simulate a failure</summary>
-        <label htmlFor="failure" className="small muted">Inject a fault to watch the agents recover</label>
+        <label htmlFor="failure" className="small muted">
+          Inject a fault to watch the agents recover
+        </label>
         <select id="failure" value={failure} onChange={(e) => setFailure(e.target.value)}>
-          {FAILURE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {FAILURE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
       </details>
       <div className="row end">
-        <button type="submit" className="primary" disabled={!valid || busy}>{busy ? "Analysing…" : "Run analysis"}</button>
+        <button type="submit" className="primary" disabled={!valid || busy}>
+          {busy ? "Analysing…" : "Run analysis"}
+        </button>
       </div>
     </form>
   );

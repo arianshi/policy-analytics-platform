@@ -58,12 +58,18 @@ class DataRegistry:
         faults = faults or FaultPlan()
         if spec.source == "internal":
             if faults.source_fault("internal"):
-                raise DataSourceError("internal: simulated outage of the internal database (fault injection)", code="unavailable", source="internal")
+                raise DataSourceError(
+                    "internal: simulated outage of the internal database (fault injection)", code="unavailable", source="internal"
+                )
             return self._load_internal(spec)
         fault = faults.source_fault(spec.source)
         if fault in ("unavailable", "rate_limited", "timeout"):
-            raise DataSourceError(f"{spec.source}: simulated {fault.replace('_', ' ')} (fault injection)",
-                                  code=fault, source=spec.source, retryable=fault != "unavailable")
+            raise DataSourceError(
+                f"{spec.source}: simulated {fault.replace('_', ' ')} (fault injection)",
+                code=fault,
+                source=spec.source,
+                retryable=fault != "unavailable",
+            )
 
         if not self.s.live_data:  # air-gapped / CI mode: snapshots *are* the configured source
             raw = self.acquire_snapshot(key, degraded=False)
@@ -99,7 +105,9 @@ class DataRegistry:
             raise DataSourceError(f"no bundled snapshot for '{key}'", code="not_found", source=spec.source)
         meta = self._manifest().get(key, {})
         df = self._parse(spec, path.read_bytes())
-        prov = self._prov(spec, mode="snapshot", retrieved_at=meta.get("retrieved_at", "unknown"), url=spec.page_url, degraded=degraded)
+        prov = self._prov(
+            spec, mode="snapshot", retrieved_at=meta.get("retrieved_at", "unknown"), url=spec.page_url, degraded=degraded
+        )
         prov.notes.append(
             f"bundled snapshot retrieved {meta.get('retrieved_at', 'at an unknown time')}; "
             + ("live source was unavailable so results may lag the latest release" if degraded else "used by configuration")
@@ -122,17 +130,31 @@ class DataRegistry:
         self._snapshot_path(spec).write_bytes(payload)
         manifest = self._manifest()
         manifest[spec.key] = {
-            "dataset_id": spec.dataset_id, "title": spec.title, "source_url": url, "page_url": spec.page_url,
-            "retrieved_at": utcnow_iso(), "bytes": len(payload), "sha256": hashlib.sha256(payload).hexdigest(),
+            "dataset_id": spec.dataset_id,
+            "title": spec.title,
+            "source_url": url,
+            "page_url": spec.page_url,
+            "retrieved_at": utcnow_iso(),
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
         }
         (self.s.snapshot_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True))
 
     # -------------------------------------------------------------- internals
     def _prov(self, spec: DatasetSpec, *, mode: str, retrieved_at: str, url: str, degraded: bool = False) -> Provenance:
         return Provenance(
-            dataset_key=spec.key, source=spec.source, source_name=spec.source_name, title=spec.title,
-            dataset_id=spec.dataset_id, url=url, fmt=spec.fmt, retrieved_at=retrieved_at, mode=mode,
-            degraded=degraded, is_mock=spec.is_mock, licence=spec.licence,
+            dataset_key=spec.key,
+            source=spec.source,
+            source_name=spec.source_name,
+            title=spec.title,
+            dataset_id=spec.dataset_id,
+            url=url,
+            fmt=spec.fmt,
+            retrieved_at=retrieved_at,
+            mode=mode,
+            degraded=degraded,
+            is_mock=spec.is_mock,
+            licence=spec.licence,
         )
 
     def _client(self) -> httpx.AsyncClient:
@@ -164,7 +186,9 @@ class DataRegistry:
                 download_url = data["url"]
                 break
             if body.get("code", 0) != 0:
-                raise DataSourceError(f"data.gov.sg: {body.get('errorMsg') or 'dataset not available'}", code="not_found", source="mom")
+                raise DataSourceError(
+                    f"data.gov.sg: {body.get('errorMsg') or 'dataset not available'}", code="not_found", source="mom"
+                )
             await self._sleep(1.0 * (attempt + 1))
         if not download_url:
             raise DataSourceError("data.gov.sg: download not ready after polling", code="timeout", source="mom", retryable=True)
@@ -200,7 +224,9 @@ class DataRegistry:
         except SchemaError:
             raise
         except Exception as exc:  # corrupt payload (HTML error page, truncated download...)
-            raise SchemaError(f"{spec.key}: could not parse {spec.fmt} payload ({exc.__class__.__name__}: {exc})", source=spec.source) from exc
+            raise SchemaError(
+                f"{spec.key}: could not parse {spec.fmt} payload ({exc.__class__.__name__}: {exc})", source=spec.source
+            ) from exc
         df.columns = [str(c).strip() for c in df.columns]
         return df
 

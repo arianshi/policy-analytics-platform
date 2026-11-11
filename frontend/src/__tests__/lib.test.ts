@@ -30,20 +30,50 @@ describe("format", () => {
 describe("pivotSeries", () => {
   it("merges series by x, sorts numerically and tracks flagged points", () => {
     const { rows, flagged } = pivotSeries([
-      { name: "a", kind: "line", data: [{ x: 2022, y: 3, flag: true }, { x: 2020, y: 1 }] },
-      { name: "b", kind: "line", data: [{ x: 2020, y: 10 }, { x: 2021, y: 20 }] },
+      {
+        name: "a",
+        kind: "line",
+        data: [
+          { x: 2022, y: 3, flag: true },
+          { x: 2020, y: 1 },
+        ],
+      },
+      {
+        name: "b",
+        kind: "line",
+        data: [
+          { x: 2020, y: 10 },
+          { x: 2021, y: 20 },
+        ],
+      },
     ]);
-    expect(rows).toEqual([{ x: 2020, a: 1, b: 10 }, { x: 2021, b: 20 }, { x: 2022, a: 3 }]);
+    expect(rows).toEqual([
+      { x: 2020, a: 1, b: 10 },
+      { x: 2021, b: 20 },
+      { x: 2022, a: 3 },
+    ]);
     expect(flagged.has("a|2022")).toBe(true);
     expect(flagged.size).toBe(1);
   });
   it("sorts categorical x values alphabetically", () => {
-    expect(pivotSeries([{ name: "s", kind: "bar", data: [{ x: "B", y: 1 }, { x: "A", y: 2 }] }]).rows.map((r) => r.x)).toEqual(["A", "B"]);
+    expect(
+      pivotSeries([
+        {
+          name: "s",
+          kind: "bar",
+          data: [
+            { x: "B", y: 1 },
+            { x: "A", y: 2 },
+          ],
+        },
+      ]).rows.map((r) => r.x),
+    ).toEqual(["A", "B"]);
   });
 });
 
 describe("api client", () => {
-  const mockFetch = (res: Partial<Response> & { json?: () => Promise<unknown> }) => vi.spyOn(globalThis, "fetch").mockResolvedValue(res as Response);
+  const mockFetch = (res: Partial<Response> & { json?: () => Promise<unknown> }) =>
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(res as Response);
 
   it("posts analyses with the simulated failures", async () => {
     const spy = mockFetch({ ok: true, status: 202, json: async () => ({ id: "x", status: "queued" }) });
@@ -53,11 +83,26 @@ describe("api client", () => {
     expect(JSON.parse(init.body as string)).toEqual({ query: "hello world", simulate_failures: ["source:mom"] });
   });
   it("turns the error envelope into an ApiError", async () => {
-    mockFetch({ ok: false, status: 422, json: async () => ({ error: { code: "validation_error", message: "Invalid request", details: [1] } }) });
-    await expect(api.getAnalysis("x")).rejects.toMatchObject({ name: "ApiError", status: 422, code: "validation_error", message: "Invalid request" });
+    mockFetch({
+      ok: false,
+      status: 422,
+      json: async () => ({ error: { code: "validation_error", message: "Invalid request", details: [1] } }),
+    });
+    await expect(api.getAnalysis("x")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 422,
+      code: "validation_error",
+      message: "Invalid request",
+    });
   });
   it("handles non-JSON error bodies and unreachable servers", async () => {
-    mockFetch({ ok: false, status: 502, json: async () => { throw new Error("html"); } });
+    mockFetch({
+      ok: false,
+      status: 502,
+      json: async () => {
+        throw new Error("html");
+      },
+    });
     await expect(api.listAnalyses()).rejects.toMatchObject({ status: 502, code: "http_error" });
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
     const err = await api.listAnalyses().catch((e) => e);

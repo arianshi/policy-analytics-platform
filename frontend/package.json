@@ -9,7 +9,9 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "next": "16.4.3",
@@ -29,6 +31,7 @@
     "eslint": "^9.39.0",
     "eslint-config-next": "16.4.3",
     "jsdom": "^26.1.0",
+    "prettier": "3.9.10",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
   }

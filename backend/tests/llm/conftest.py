@@ -10,7 +10,9 @@ from tests.conftest import HEADLINE, make_ctx
 
 @pytest.fixture(scope="module")
 def module_settings(tmp_path_factory) -> Settings:
-    return Settings(live_data=False, runtime_dir=Path(tmp_path_factory.mktemp("rt")), llm_provider_order="offline", http_backoff_s=0.0)
+    return Settings(
+        live_data=False, runtime_dir=Path(tmp_path_factory.mktemp("rt")), llm_provider_order="offline", http_backoff_s=0.0
+    )
 
 
 @pytest.fixture(scope="module")

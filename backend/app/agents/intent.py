@@ -17,7 +17,15 @@ from ..llm.router import parse_json_object
 from ..ontology import METRIC_BY_ID, METRICS, SECTOR_BY_ID, SECTORS, resolve_metrics, resolve_sectors
 
 FIRST_DATA_YEAR = 1998
-CORE_METRICS = ["employed_residents", "job_vacancies", "job_vacancy_rate", "retrenchments", "recruitment_rate", "resignation_rate", "total_wage_change"]
+CORE_METRICS = [
+    "employed_residents",
+    "job_vacancies",
+    "job_vacancy_rate",
+    "retrenchments",
+    "recruitment_rate",
+    "resignation_rate",
+    "total_wage_change",
+]
 OVERVIEW_METRICS = ["employed_residents", "total_wage_change", "job_vacancy_rate"]
 SUGGESTIONS = [
     "Analyse employment trends in the technology sector from 2020-2024",
@@ -117,11 +125,18 @@ _RANGE = re.compile(r"\b((?:19|20)\d{2})\s*(?:-|–|—|to|and|until|through|til
 _SINCE = re.compile(r"\b(?:since|from|after)\s+((?:19|20)\d{2})\b", re.I)
 _LAST_N = re.compile(r"\b(?:last|past|previous|recent)\s+(\d{1,2})\s+years?\b", re.I)
 _YEAR = re.compile(r"\b((?:19|20)\d{2})\b")
-_COMPARE = re.compile(r"\b(compare|comparison|versus|vs\.?|against|rank|ranking|which sectors?|how does .* compare|relative to)\b", re.I)
+_COMPARE = re.compile(
+    r"\b(compare|comparison|versus|vs\.?|against|rank|ranking|which sectors?|how does .* compare|relative to)\b", re.I
+)
 _CORR = re.compile(r"\b(correlat\w*|relationship|link between|linked|associat\w*|related to|relate)\b", re.I)
-_FORECAST = re.compile(r"\b(forecast\w*|predict\w*|project\w*|outlook|next (?:one|two|three|\d) years?|next year|going forward|future)\b", re.I)
-_TOPIC = re.compile(r"\b(employ\w*|jobs?|work\w*|wages?|salar\w*|pay|earnings|vacanc\w*|hiring|recruit\w*|resign\w*|attrition|retrench\w*|layoffs?|"
-                    r"unemploy\w*|labou?r|gdp|output|productiv\w*|sector|industr\w*|economy|economic|growth|manpower|talent|skills?|trend\w*)\b", re.I)
+_FORECAST = re.compile(
+    r"\b(forecast\w*|predict\w*|project\w*|outlook|next (?:one|two|three|\d) years?|next year|going forward|future)\b", re.I
+)
+_TOPIC = re.compile(
+    r"\b(employ\w*|jobs?|work\w*|wages?|salar\w*|pay|earnings|vacanc\w*|hiring|recruit\w*|resign\w*|attrition|retrench\w*|layoffs?|"
+    r"unemploy\w*|labou?r|gdp|output|productiv\w*|sector|industr\w*|economy|economic|growth|manpower|talent|skills?|trend\w*)\b",
+    re.I,
+)
 
 
 _ONLY_HEADCOUNT = re.compile(r"\b(headcount|number of (?:employed|workers)|employed residents)\b", re.I)
@@ -149,7 +164,9 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
     elif _YEAR.search(q):
         year = int(_YEAR.search(q).group(1))  # type: ignore[union-attr]
         start, end = year - 4, year
-        assumptions.append(f"Only the year {year} was given; the 5 years up to {year} are analysed so that a trend can be measured.")
+        assumptions.append(
+            f"Only the year {year} was given; the 5 years up to {year} are analysed so that a trend can be measured."
+        )
     else:
         end, start = latest, latest - 4
         assumptions.append(f"No period given; assumed the latest 5 years ({start}-{end}).")
@@ -170,8 +187,10 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
     needs, clar = False, ""
     if not on_topic:
         needs = True
-        clar = ("I can analyse Singapore labour-market and economic data (employment, wages, job vacancies, retrenchments, GDP by sector). "
-                "Could you say which sector or measure you are interested in, and over what period?")
+        clar = (
+            "I can analyse Singapore labour-market and economic data (employment, wages, job vacancies, retrenchments, GDP by sector). "
+            "Could you say which sector or measure you are interested in, and over what period?"
+        )
     elif not sectors and not metrics and len(q.split()) < 4:
         needs = True
         clar = "Which sector (for example technology/ICT, finance, manufacturing) and which measure (employment, wages, vacancies...) should I analyse?"
@@ -186,10 +205,22 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
     if metrics == ["employed_residents"] and kind in ("trend", "overview", "compare") and not _ONLY_HEADCOUNT.search(q):
         metrics = []  # "employment trends" means the labour-market picture, not just headcount
     if not metrics and sectors:
-        assumptions.append("No specific measure named; a standard employment-trends bundle (employment, vacancies, recruitment, resignations, retrenchments, wages) was used.")
+        assumptions.append(
+            "No specific measure named; a standard employment-trends bundle (employment, vacancies, recruitment, resignations, retrenchments, wages) was used."
+        )
 
-    intent = QueryIntent(kind=kind, sectors=sectors, metrics=metrics, start_year=start, end_year=end, forecast_horizon=horizon,
-                         needs_clarification=needs, clarification=clar, suggestions=SUGGESTIONS[:3] if needs else [], assumptions=assumptions)
+    intent = QueryIntent(
+        kind=kind,
+        sectors=sectors,
+        metrics=metrics,
+        start_year=start,
+        end_year=end,
+        forecast_horizon=horizon,
+        needs_clarification=needs,
+        clarification=clar,
+        suggestions=SUGGESTIONS[:3] if needs else [],
+        assumptions=assumptions,
+    )
     return normalise_years(intent, now_year=now_year)
 
 
@@ -242,13 +273,27 @@ def build_plan(intent: QueryIntent, *, skipped: set[str] | None = None) -> Plan:
     steps: list[dict[str, Any]] = []
     shown = [m for m in metrics if has(m)]
     if focus and shown:
-        steps.append({"tool": "analyze_trends", "args": {"sector": focus, "metrics": shown}, "why": f"trend statistics for {len(shown)} measures"})
+        steps.append(
+            {
+                "tool": "analyze_trends",
+                "args": {"sector": focus, "metrics": shown},
+                "why": f"trend statistics for {len(shown)} measures",
+            }
+        )
     for extra in intent.sectors[1:3]:
         if shown:
-            steps.append({"tool": "analyze_trends", "args": {"sector": extra, "metrics": shown[:2]}, "why": f"comparison sector {extra}"})
+            steps.append(
+                {"tool": "analyze_trends", "args": {"sector": extra, "metrics": shown[:2]}, "why": f"comparison sector {extra}"}
+            )
     cmp_metrics = [m for m in shown if m in (primary, "total_wage_change", "job_vacancy_rate")][:2] or shown[:1]
     if cmp_metrics:
-        steps.append({"tool": "compare_sectors", "args": {"metrics": cmp_metrics, "focus": focus}, "why": "rank the focus sector against all major industries"})
+        steps.append(
+            {
+                "tool": "compare_sectors",
+                "args": {"metrics": cmp_metrics, "focus": focus},
+                "why": "rank the focus sector against all major industries",
+            }
+        )
     if focus:
         pairs = []
         if has("job_vacancies") and has("retrenchments"):
@@ -259,13 +304,28 @@ def build_plan(intent: QueryIntent, *, skipped: set[str] | None = None) -> Plan:
             pairs = [[intent.metrics[0], intent.metrics[1]], *pairs]
         anomaly_metrics = [m for m in dict.fromkeys([primary, "job_vacancies"]) if has(m)]
         if pairs or anomaly_metrics:
-            steps.append({"tool": "analyze_relationships", "args": {"sector": focus, "pairs": pairs[:3], "anomaly_metrics": anomaly_metrics},
-                          "why": "correlations (on year-on-year changes) and anomaly detection"})
+            steps.append(
+                {
+                    "tool": "analyze_relationships",
+                    "args": {"sector": focus, "pairs": pairs[:3], "anomaly_metrics": anomaly_metrics},
+                    "why": "correlations (on year-on-year changes) and anomaly detection",
+                }
+            )
         if (has("gdp") and has("employed_residents")) or has("programme_completions"):
-            steps.append({"tool": "cross_source", "args": {"sector": focus}, "why": "join sources: output per worker, talent pipeline"})
-    steps.append({"tool": "outlook", "args": {"sector": focus if focus and has(primary) else None, "metric": primary if has(primary) else None,
-                                              "horizon": intent.forecast_horizon},
-                  "why": "economy-wide context" + (" and an indicative projection" if intent.forecast_horizon else "")})
+            steps.append(
+                {"tool": "cross_source", "args": {"sector": focus}, "why": "join sources: output per worker, talent pipeline"}
+            )
+    steps.append(
+        {
+            "tool": "outlook",
+            "args": {
+                "sector": focus if focus and has(primary) else None,
+                "metric": primary if has(primary) else None,
+                "horizon": intent.forecast_horizon,
+            },
+            "why": "economy-wide context" + (" and an indicative projection" if intent.forecast_horizon else ""),
+        }
+    )
     plan = Plan(focus, (y0, y1), required, optional, steps)
     if skipped:
         plan.notes.append("Datasets skipped after extraction failures: " + ", ".join(sorted(skipped)))

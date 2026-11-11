@@ -6,7 +6,10 @@ function Items({ items, facts, ordered }: { items: NarrativeItem[]; facts: Analy
   return (
     <List className="items">
       {items.map((it, i) => (
-        <li key={i}><p>{it.text}</p><FactRefs ids={it.fact_ids} facts={facts} /></li>
+        <li key={i}>
+          <p>{it.text}</p>
+          <FactRefs ids={it.fact_ids} facts={facts} />
+        </li>
       ))}
     </List>
   );
@@ -21,7 +24,11 @@ export function SummaryView({ result }: { result: AnalysisResult }) {
       {r.assumptions.length > 0 && (
         <aside className="notice" aria-label="Assumptions">
           <strong>Assumptions made</strong>
-          <ul>{r.assumptions.map((a) => <li key={a}>{a}</li>)}</ul>
+          <ul>
+            {r.assumptions.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
         </aside>
       )}
       <h3>Executive summary</h3>
@@ -35,10 +42,24 @@ export function SummaryView({ result }: { result: AnalysisResult }) {
           <FactRefs ids={f.fact_ids} facts={result.facts} />
         </article>
       ))}
-      {r.implications.length > 0 && (<><h3>Implications</h3><Items items={r.implications} facts={result.facts} /></>)}
-      {r.recommendations.length > 0 && (<><h3>Recommendations</h3><Items items={r.recommendations} facts={result.facts} ordered /></>)}
+      {r.implications.length > 0 && (
+        <>
+          <h3>Implications</h3>
+          <Items items={r.implications} facts={result.facts} />
+        </>
+      )}
+      {r.recommendations.length > 0 && (
+        <>
+          <h3>Recommendations</h3>
+          <Items items={r.recommendations} facts={result.facts} ordered />
+        </>
+      )}
       <h3>Limitations</h3>
-      <ul className="small">{r.limitations.map((l) => <li key={l}>{l}</li>)}</ul>
+      <ul className="small">
+        {r.limitations.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
     </div>
   );
 }

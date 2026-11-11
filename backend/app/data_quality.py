@@ -64,8 +64,14 @@ def process_dataset(raw: RawDataset, *, now_year: int | None = None) -> Processe
     norm = normalise(raw.spec, raw.df)
     df, report = clean(raw.spec, norm, now_year=now_year or datetime.now(UTC).year)
     if raw.prov.degraded:
-        report.issues.append(DQIssue("degraded_source", "warning",
-                                     "Live source was unavailable; a bundled snapshot was used", action="flagged in report"))
+        report.issues.append(
+            DQIssue(
+                "degraded_source",
+                "warning",
+                "Live source was unavailable; a bundled snapshot was used",
+                action="flagged in report",
+            )
+        )
         report.score = max(0, report.score - 5)
     if raw.prov.is_mock:
         report.issues.append(DQIssue("mock_data", "info", "Synthetic MOCK dataset - illustrative only, not official statistics"))
@@ -84,8 +90,16 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
     year_num = pd.to_numeric(df["year"].astype(str).str.strip(), errors="coerce")
     bad_year = year_num.isna() | (year_num < 1900) | (year_num > now_year + 1)
     if bad_year.any():
-        issues.append(DQIssue("invalid_year", "warning", f"{int(bad_year.sum())} rows have an unparseable or out-of-range year",
-                              int(bad_year.sum()), "rows dropped", [str(v) for v in df.loc[bad_year, "year"].unique()[:3]]))
+        issues.append(
+            DQIssue(
+                "invalid_year",
+                "warning",
+                f"{int(bad_year.sum())} rows have an unparseable or out-of-range year",
+                int(bad_year.sum()),
+                "rows dropped",
+                [str(v) for v in df.loc[bad_year, "year"].unique()[:3]],
+            )
+        )
     df = df[~bad_year].copy()
     df["year"] = year_num[~bad_year].astype(int)
 
@@ -100,11 +114,26 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
         detail = ", ".join(f"'{k}' x{v}" for k, v in counts.items()) or ""
         if n_blank:
             detail = (detail + ", " if detail else "") + f"blank x{n_blank}"
-        issues.append(DQIssue("missing_values", "info", f"{int(is_missing_token.sum())} suppressed/missing values ({detail})",
-                              int(is_missing_token.sum()), "treated as missing, excluded from calculations"))
+        issues.append(
+            DQIssue(
+                "missing_values",
+                "info",
+                f"{int(is_missing_token.sum())} suppressed/missing values ({detail})",
+                int(is_missing_token.sum()),
+                "treated as missing, excluded from calculations",
+            )
+        )
     if unparseable.any():
-        issues.append(DQIssue("non_numeric_values", "warning", f"{int(unparseable.sum())} values are not numeric",
-                              int(unparseable.sum()), "set to missing", [str(v) for v in tokens[unparseable].unique()[:3]]))
+        issues.append(
+            DQIssue(
+                "non_numeric_values",
+                "warning",
+                f"{int(unparseable.sum())} values are not numeric",
+                int(unparseable.sum()),
+                "set to missing",
+                [str(v) for v in tokens[unparseable].unique()[:3]],
+            )
+        )
     df["value"] = numeric.astype(float)
 
     # --- domain validation --------------------------------------------------------------------
@@ -115,22 +144,39 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
     else:
         impossible = df["value"].notna() & (df["value"] < 0)
     if impossible.any():
-        issues.append(DQIssue("out_of_domain", "error", f"{int(impossible.sum())} values violate the {metric.kind} domain for '{metric.name}'",
-                              int(impossible.sum()), "set to missing", [str(v) for v in df.loc[impossible, "value"].head(3)]))
+        issues.append(
+            DQIssue(
+                "out_of_domain",
+                "error",
+                f"{int(impossible.sum())} values violate the {metric.kind} domain for '{metric.name}'",
+                int(impossible.sum()),
+                "set to missing",
+                [str(v) for v in df.loc[impossible, "value"].head(3)],
+            )
+        )
         df.loc[impossible, "value"] = np.nan
 
     # --- duplicates ----------------------------------------------------------------------------
     key = ["year", "sector_label", *norm.dims]
     exact = df.duplicated(keep="first")
     if exact.any():
-        issues.append(DQIssue("duplicate_rows", "warning", f"{int(exact.sum())} exact duplicate rows", int(exact.sum()), "removed"))
+        issues.append(
+            DQIssue("duplicate_rows", "warning", f"{int(exact.sum())} exact duplicate rows", int(exact.sum()), "removed")
+        )
         df = df[~exact]
     conflict = df.duplicated(subset=key, keep=False)
     if conflict.any():
         ex = [f"{r.sector_label} {r.year}: {r.value:g}" for r in df[conflict].head(4).itertuples() if pd.notna(r.value)]
-        issues.append(DQIssue("conflicting_duplicates", "warning",
-                              f"{int(conflict.sum())} rows share a key but disagree, so neither can be trusted", int(conflict.sum()),
-                              "both values excluded - verify with the source agency", ex))
+        issues.append(
+            DQIssue(
+                "conflicting_duplicates",
+                "warning",
+                f"{int(conflict.sum())} rows share a key but disagree, so neither can be trusted",
+                int(conflict.sum()),
+                "both values excluded - verify with the source agency",
+                ex,
+            )
+        )
         df.loc[conflict, "value"] = np.nan
 
     # --- isolated spikes (implausible, non-persisting values) ----------------------------------
@@ -139,23 +185,45 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
     if spikes.any():
         ex = [f"{r.sector_label} {r.year}: {r.value:g}" for r in df[spikes].head(3).itertuples()]
         if spec.source == "internal":  # unverified internal systems: entry errors are likely
-            issues.append(DQIssue("isolated_spike", "warning", f"{int(spikes.sum())} values are >{ISOLATED_SPIKE_RATIO:g}x their neighbours "
-                                  "and revert immediately (likely entry errors)", int(spikes.sum()), "quarantined (set to missing)", ex))
+            issues.append(
+                DQIssue(
+                    "isolated_spike",
+                    "warning",
+                    f"{int(spikes.sum())} values are >{ISOLATED_SPIKE_RATIO:g}x their neighbours "
+                    "and revert immediately (likely entry errors)",
+                    int(spikes.sum()),
+                    "quarantined (set to missing)",
+                    ex,
+                )
+            )
             df.loc[spikes, "value"] = np.nan
         else:  # official statistics: spikes are often real events (e.g. COVID-19) - flag, never delete
-            issues.append(DQIssue("unusual_jump", "info", f"{int(spikes.sum())} values are >{ISOLATED_SPIKE_RATIO:g}x their neighbours and revert; "
-                                  "retained because this is official data (may be a genuine event)", int(spikes.sum()), "retained, flagged", ex))
+            issues.append(
+                DQIssue(
+                    "unusual_jump",
+                    "info",
+                    f"{int(spikes.sum())} values are >{ISOLATED_SPIKE_RATIO:g}x their neighbours and revert; "
+                    "retained because this is official data (may be a genuine event)",
+                    int(spikes.sum()),
+                    "retained, flagged",
+                    ex,
+                )
+            )
 
     # --- aggregate dims / combined labels ------------------------------------------------------
     completeness = 1.0 - float(df["value"].isna().mean()) if len(df) else 0.0
     df["sector"] = df["sector"].where(df["sector"].notna(), None)
     if norm.aggregate:
         grp = df.assign(_sector=df["sector"].fillna("__economy__")).groupby(["year", "_sector"], sort=True)
-        agg = grp.agg(value=("value", lambda s: s.sum(min_count=1)), sector_label=("sector_label", "first"), unit=("unit", "first")).reset_index()
+        agg = grp.agg(
+            value=("value", lambda s: s.sum(min_count=1)), sector_label=("sector_label", "first"), unit=("unit", "first")
+        ).reset_index()
         agg["sector"] = agg["_sector"].where(agg["_sector"] != "__economy__", None)
         df = agg[["year", "sector", "sector_label", "value", "unit"]]
         if norm.dims:
-            issues.append(DQIssue("aggregated", "info", f"Summed over {', '.join(norm.dims)} to the (year, sector) level", 0, "aggregated"))
+            issues.append(
+                DQIssue("aggregated", "info", f"Summed over {', '.join(norm.dims)} to the (year, sector) level", 0, "aggregated")
+            )
 
     # --- drop missing values -----------------------------------------------------
     df = df[df["value"].notna()].sort_values(["sector", "year"], na_position="first").reset_index(drop=True)
@@ -163,8 +231,16 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
     # --- gaps & freshness --------------------------------------------------------------------------
     gaps = _year_gaps(df)
     if gaps:
-        issues.append(DQIssue("year_gaps", "info", f"{len(gaps)} series have missing years inside their range",
-                              len(gaps), "left as gaps (no interpolation)", gaps[:3]))
+        issues.append(
+            DQIssue(
+                "year_gaps",
+                "info",
+                f"{len(gaps)} series have missing years inside their range",
+                len(gaps),
+                "left as gaps (no interpolation)",
+                gaps[:3],
+            )
+        )
     ymax = int(df["year"].max()) if len(df) else None
     ymin = int(df["year"].min()) if len(df) else None
     if ymax is not None and now_year - ymax > 2:
@@ -172,8 +248,9 @@ def clean(spec: DatasetSpec, norm: Normalised, *, now_year: int) -> tuple[pd.Dat
     if not len(df):
         issues.append(DQIssue("empty", "error", "No usable rows remain after cleaning", action="dataset unusable"))
 
-    report = DQReport(spec.key, rows_in, len(df), round(completeness, 4), 0, ymin, ymax,
-                      int(df["sector"].nunique()) if len(df) else 0, issues)
+    report = DQReport(
+        spec.key, rows_in, len(df), round(completeness, 4), 0, ymin, ymax, int(df["sector"].nunique()) if len(df) else 0, issues
+    )
     report.score = _score(report)
     return df[["year", "sector", "sector_label", "value", "unit"]], report
 

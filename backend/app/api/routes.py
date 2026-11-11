@@ -38,8 +38,14 @@ async def health(request: Request):
     svc = _svc(request)
     s = request.app.state.settings
     ok = svc.db.ping()
-    return {"status": "ok" if ok else "degraded", "version": __version__, "database": "ok" if ok else "error",
-            "live_data": s.live_data, "running_analyses": len(svc.tasks), "llm_providers_configured": [p["name"] for p in svc.router.status() if p["configured"]]}
+    return {
+        "status": "ok" if ok else "degraded",
+        "version": __version__,
+        "database": "ok" if ok else "error",
+        "live_data": s.live_data,
+        "running_analyses": len(svc.tasks),
+        "llm_providers_configured": [p["name"] for p in svc.router.status() if p["configured"]],
+    }
 
 
 @router.get("/samples")
@@ -97,28 +103,59 @@ async def export_analysis(analysis_id: str, request: Request, format: str = Quer
         raise HTTPException(404, detail={"code": "not_found", "message": f"analysis '{analysis_id}' not found"})
     result = rec.get("result")
     if not result or not result.get("report"):
-        raise HTTPException(409, detail={"code": "no_report", "message": f"analysis is '{rec['status']}' and has no report to export"})
+        raise HTTPException(
+            409, detail={"code": "no_report", "message": f"analysis is '{rec['status']}' and has no report to export"}
+        )
     name = f"analysis-{analysis_id}"
     if format == "json":
-        return Response(json.dumps(result, indent=2, default=str), media_type="application/json", headers={"Content-Disposition": f'attachment; filename="{name}.json"'})
+        return Response(
+            json.dumps(result, indent=2, default=str),
+            media_type="application/json",
+            headers={"Content-Disposition": f'attachment; filename="{name}.json"'},
+        )
     if format == "csv":
-        return Response(facts_to_csv(result), media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="{name}-facts.csv"'})
+        return Response(
+            facts_to_csv(result),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{name}-facts.csv"'},
+        )
     if format == "html":
-        return Response(to_html(result), media_type="text/html", headers={"Content-Disposition": f'attachment; filename="{name}.html"'})
-    return Response(to_markdown(result), media_type="text/markdown", headers={"Content-Disposition": f'attachment; filename="{name}.md"'})
+        return Response(
+            to_html(result), media_type="text/html", headers={"Content-Disposition": f'attachment; filename="{name}.html"'}
+        )
+    return Response(
+        to_markdown(result), media_type="text/markdown", headers={"Content-Disposition": f'attachment; filename="{name}.md"'}
+    )
 
 
 @router.get("/providers")
 async def providers(request: Request):
     svc = _svc(request)
-    return {"providers": svc.router.status(), "totals": svc.db.llm_totals(), "budget_usd_per_analysis": request.app.state.settings.llm_budget_usd}
+    return {
+        "providers": svc.router.status(),
+        "totals": svc.db.llm_totals(),
+        "budget_usd_per_analysis": request.app.state.settings.llm_budget_usd,
+    }
 
 
 @router.get("/datasets")
 async def datasets(request: Request):
     stored = {d["key"]: d for d in _svc(request).db.list_datasets()}
-    return {"datasets": [{"key": s.key, "title": s.title, "source": s.source_name, "format": s.fmt, "metric": s.metric, "url": s.page_url, "mock": s.is_mock,
-                          "stored": stored.get(s.key)} for s in CATALOG]}
+    return {
+        "datasets": [
+            {
+                "key": s.key,
+                "title": s.title,
+                "source": s.source_name,
+                "format": s.fmt,
+                "metric": s.metric,
+                "url": s.page_url,
+                "mock": s.is_mock,
+                "stored": stored.get(s.key),
+            }
+            for s in CATALOG
+        ]
+    }
 
 
 @router.get("/datasets/{key}/rows")

@@ -15,8 +15,10 @@ from .policies import decide_analytics
 
 class AnalyticsAgent(ReActAgent):
     name = "analytics"
-    role = ("You turn cleaned datasets into statistically sound findings: trends, cross-sector comparison, correlations on year-on-year changes, anomaly detection, "
-            "cross-source joins and cautious projections. You never state a number that the tools did not compute.")
+    role = (
+        "You turn cleaned datasets into statistically sound findings: trends, cross-sector comparison, correlations on year-on-year changes, anomaly detection, "
+        "cross-source joins and cautious projections. You never state a number that the tools did not compute."
+    )
 
     def __init__(self, ctx: RunContext):
         plan = ctx.plan
@@ -27,11 +29,36 @@ class AnalyticsAgent(ReActAgent):
         self.scope_checked = False
         self.done: Counter[str] = Counter()
         self.add_tool("check_scope", "Report what each loaded dataset covers (sectors, years)", "", self._scope)
-        self.add_tool("analyze_trends", "Growth, peak/trough, linear trend and latest change for a sector", "sector: str, metrics: list[str]", self._trends)
-        self.add_tool("compare_sectors", "Rank sectors on a measure and compute the focus sector's employment share", "metrics: list[str], focus: str|null", self._compare)
-        self.add_tool("analyze_relationships", "Correlations of year-on-year changes and anomaly detection", "sector: str, pairs: list[[str,str]], anomaly_metrics: list[str]", self._relationships)
-        self.add_tool("cross_source", "Join sources: value added per worker (SingStat x MOM) and talent pipeline (internal x MOM)", "sector: str", self._cross)
-        self.add_tool("outlook", "Economy-wide context and an optional indicative projection", "sector: str|null, metric: str|null, horizon: int", self._outlook)
+        self.add_tool(
+            "analyze_trends",
+            "Growth, peak/trough, linear trend and latest change for a sector",
+            "sector: str, metrics: list[str]",
+            self._trends,
+        )
+        self.add_tool(
+            "compare_sectors",
+            "Rank sectors on a measure and compute the focus sector's employment share",
+            "metrics: list[str], focus: str|null",
+            self._compare,
+        )
+        self.add_tool(
+            "analyze_relationships",
+            "Correlations of year-on-year changes and anomaly detection",
+            "sector: str, pairs: list[[str,str]], anomaly_metrics: list[str]",
+            self._relationships,
+        )
+        self.add_tool(
+            "cross_source",
+            "Join sources: value added per worker (SingStat x MOM) and talent pipeline (internal x MOM)",
+            "sector: str",
+            self._cross,
+        )
+        self.add_tool(
+            "outlook",
+            "Economy-wide context and an optional indicative projection",
+            "sector: str|null, metric: str|null, horizon: int",
+            self._outlook,
+        )
 
     # ------------------------------------------------------------------ state
     def goal(self) -> str:
@@ -49,7 +76,13 @@ class AnalyticsAgent(ReActAgent):
 
     def state(self) -> dict[str, Any]:
         n_facts = len([f for f in self.ctx.facts.all() if f.kind != "limitation"])
-        status = "failed" if n_facts == 0 and self.scope_checked and not self._todo() else "partial" if any(f.kind == "limitation" for f in self.ctx.facts.all()) else "ok"
+        status = (
+            "failed"
+            if n_facts == 0 and self.scope_checked and not self._todo()
+            else "partial"
+            if any(f.kind == "limitation" for f in self.ctx.facts.all())
+            else "ok"
+        )
         return {"scope_checked": self.scope_checked, "todo": self._todo(), "facts": len(self.ctx.facts), "final_status": status}
 
     def policy(self, state: dict[str, Any]) -> dict[str, Any]:
@@ -85,7 +118,11 @@ class AnalyticsAgent(ReActAgent):
         self.done[tool] += 1
         new = [fid for r in results for fid in r.get("fact_ids", [])]
         heads = [r["headline"] for r in results if r.get("headline")][:2]
-        return {"summary": f"{what}: {len(new)} new fact(s)" + (f". e.g. {heads[0]}" if heads else ""), "fact_ids": new, "statuses": [r["status"] for r in results]}
+        return {
+            "summary": f"{what}: {len(new)} new fact(s)" + (f". e.g. {heads[0]}" if heads else ""),
+            "fact_ids": new,
+            "statuses": [r["status"] for r in results],
+        }
 
     # ------------------------------------------------------------------ tools
     async def _scope(self, args: dict[str, Any]) -> dict[str, Any]:
@@ -98,7 +135,10 @@ class AnalyticsAgent(ReActAgent):
         for n in notes:
             self.ctx.warn(self.name, n)
         self.scope_checked = True
-        return {"summary": f"{len(cov)} measures available" + (f"; {len(notes)} end before {y1}" if notes else ""), "coverage": cov}
+        return {
+            "summary": f"{len(cov)} measures available" + (f"; {len(notes)} end before {y1}" if notes else ""),
+            "coverage": cov,
+        }
 
     async def _trends(self, args: dict[str, Any]) -> dict[str, Any]:
         sector, metrics = self._sector(args), self._metrics(args)
@@ -107,7 +147,12 @@ class AnalyticsAgent(ReActAgent):
         results = []
         for m in metrics:
             if not self.engine.has(m, sector):
-                self.engine._limit(f"{sector_name(sector)}: no {METRIC_BY_ID[m].name.lower()} data is available for this sector in the loaded sources.", sector, m, self.engine.sources(m))
+                self.engine._limit(
+                    f"{sector_name(sector)}: no {METRIC_BY_ID[m].name.lower()} data is available for this sector in the loaded sources.",
+                    sector,
+                    m,
+                    self.engine.sources(m),
+                )
                 results.append({"status": "no_data"})
                 continue
             results.append(self.engine.trend(sector, m, y0, y1, primary=(m == primary and sector == self.ctx.plan.focus)))  # type: ignore[union-attr]

@@ -75,7 +75,9 @@ def correlation(x: np.ndarray, y: np.ndarray) -> Correlation | None:
     return Correlation(float(r), float(p), float(rho), len(x))
 
 
-def robust_anomalies(years: np.ndarray, values: np.ndarray, *, relative: bool, threshold: float = 3.0, min_points: int = 8) -> list[Anomaly]:
+def robust_anomalies(
+    years: np.ndarray, values: np.ndarray, *, relative: bool, threshold: float = 3.0, min_points: int = 8
+) -> list[Anomaly]:
     """Flag unusually large year-on-year moves using a median/MAD z-score (robust to the anomalies themselves)."""
     v = np.asarray(values, dtype=float)
     yrs = np.asarray(years)
@@ -91,11 +93,14 @@ def robust_anomalies(years: np.ndarray, values: np.ndarray, *, relative: bool, t
     if mad == 0:
         return []
     z = 0.6745 * (change - med) / mad
-    return [Anomaly(int(yrs[i + 1]), float(change[i]), float(z[i])) for i in range(len(change)) if ok[i] and abs(z[i]) >= threshold]
+    return [
+        Anomaly(int(yrs[i + 1]), float(change[i]), float(z[i])) for i in range(len(change)) if ok[i] and abs(z[i]) >= threshold
+    ]
 
 
-def forecast_linear(years: np.ndarray, values: np.ndarray, horizon: int, *, window: int = 8, level: float = 0.8
-                    ) -> list[tuple[int, float, float, float]]:
+def forecast_linear(
+    years: np.ndarray, values: np.ndarray, horizon: int, *, window: int = 8, level: float = 0.8
+) -> list[tuple[int, float, float, float]]:
     """Indicative forecast: OLS on the last ``window`` points with a t-based prediction interval."""
     x = np.asarray(years, dtype=float)[-window:]
     y = np.asarray(values, dtype=float)[-window:]

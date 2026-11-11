@@ -20,8 +20,11 @@ class GeminiProvider(LLMProvider):
         gen = {"temperature": req.temperature, "maxOutputTokens": req.max_tokens}
         if req.json_mode:
             gen["responseMimeType"] = "application/json"
-        body = {"systemInstruction": {"parts": [{"text": req.system}]},
-                "contents": [{"role": "user", "parts": [{"text": req.prompt}]}], "generationConfig": gen}
+        body = {
+            "systemInstruction": {"parts": [{"text": req.system}]},
+            "contents": [{"role": "user", "parts": [{"text": req.prompt}]}],
+            "generationConfig": gen,
+        }
         try:
             async with httpx.AsyncClient(transport=self._transport, timeout=timeout_s) as client:
                 resp = await client.post(url, headers={"x-goog-api-key": self.api_key}, json=body)

@@ -32,7 +32,9 @@ async def test_load_20_concurrent_analyses(settings):
     durations = sorted(r["duration_ms"] for r in recs)
     assert all(r["status"] == "completed" for r in recs)
     p95 = durations[int(len(durations) * 0.95) - 1]
-    print(f"\n20 analyses in {wall:.1f}s ({20 / wall:.1f}/s); duration p50={statistics.median(durations)}ms p95={p95}ms max={durations[-1]}ms")
+    print(
+        f"\n20 analyses in {wall:.1f}s ({20 / wall:.1f}/s); duration p50={statistics.median(durations)}ms p95={p95}ms max={durations[-1]}ms"
+    )
     assert wall < 60 and p95 < 15000
 
 

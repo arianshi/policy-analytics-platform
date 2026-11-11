@@ -30,9 +30,23 @@ def build_citations(processed: dict[str, ProcessedDataset], facts: list[dict[str
     out = []
     for i, key in enumerate(order, 1):
         p = processed[key].prov
-        out.append({"id": f"S{i}", "dataset_key": key, "title": p.title, "source": p.source_name, "dataset_id": p.dataset_id, "url": p.url,
-                    "retrieved_at": p.retrieved_at, "mode": p.mode, "degraded": p.degraded, "is_mock": p.is_mock, "licence": p.licence,
-                    "notes": p.notes, "used_by": used_by[key]})
+        out.append(
+            {
+                "id": f"S{i}",
+                "dataset_key": key,
+                "title": p.title,
+                "source": p.source_name,
+                "dataset_id": p.dataset_id,
+                "url": p.url,
+                "retrieved_at": p.retrieved_at,
+                "mode": p.mode,
+                "degraded": p.degraded,
+                "is_mock": p.is_mock,
+                "licence": p.licence,
+                "notes": p.notes,
+                "used_by": used_by[key],
+            }
+        )
     return out
 
 
@@ -49,11 +63,24 @@ def build_limitations(facts: list[dict[str, Any]], dq: dict[str, DQReport], proc
                 out.append(c)
     for key, p in processed.items():
         if p.prov.degraded:
-            out.append(f"{p.prov.title}: the live source was unavailable, so a bundled snapshot retrieved {p.prov.retrieved_at[:10]} was used; recent revisions may be missing.")
+            out.append(
+                f"{p.prov.title}: the live source was unavailable, so a bundled snapshot retrieved {p.prov.retrieved_at[:10]} was used; recent revisions may be missing."
+            )
         r = dq.get(key)
         if r:
             for i in r.issues:
-                if i.code in ("conflicting_duplicates", "invalid_year", "non_numeric_values", "out_of_domain", "isolated_spike", "duplicate_rows") and i.severity != "info":
+                if (
+                    i.code
+                    in (
+                        "conflicting_duplicates",
+                        "invalid_year",
+                        "non_numeric_values",
+                        "out_of_domain",
+                        "isolated_spike",
+                        "duplicate_rows",
+                    )
+                    and i.severity != "info"
+                ):
                     out.append(f"{p.prov.title}: {i.message} - {i.action}.")
     return list(dict.fromkeys(out))
 
@@ -61,19 +88,42 @@ def build_limitations(facts: list[dict[str, Any]], dq: dict[str, DQReport], proc
 def _title(intent: dict[str, Any]) -> str:
     sectors = [sector_name(s) for s in intent.get("sectors", [])]
     subject = " vs ".join(sectors) if sectors else "Major industries"
-    kind = {"trend": "employment & labour-market trends", "compare": "comparison", "correlate": "relationships", "forecast": "outlook", "overview": "overview"}[intent["kind"]]
+    kind = {
+        "trend": "employment & labour-market trends",
+        "compare": "comparison",
+        "correlate": "relationships",
+        "forecast": "outlook",
+        "overview": "overview",
+    }[intent["kind"]]
     return f"{subject}: {kind}, {intent['start_year']}-{intent['end_year']}"
 
 
-def assemble_report(*, query: str, intent: dict[str, Any], facts: list[dict[str, Any]], processed: dict[str, ProcessedDataset], dq: dict[str, DQReport],
-                    narrative: dict[str, Any], narrative_source: str, verification: dict[str, Any]) -> dict[str, Any]:
+def assemble_report(
+    *,
+    query: str,
+    intent: dict[str, Any],
+    facts: list[dict[str, Any]],
+    processed: dict[str, ProcessedDataset],
+    dq: dict[str, DQReport],
+    narrative: dict[str, Any],
+    narrative_source: str,
+    verification: dict[str, Any],
+) -> dict[str, Any]:
     citations = build_citations(processed, facts)
     findings = [{"id": f"K{i}", **item} for i, item in enumerate(narrative.get("findings", []), 1)]
     return {
-        "title": _title(intent), "query": query, "window": [intent["start_year"], intent["end_year"]],
+        "title": _title(intent),
+        "query": query,
+        "window": [intent["start_year"], intent["end_year"]],
         "executive_summary": narrative.get("executive_summary") or {"text": "", "fact_ids": []},
-        "findings": findings, "implications": narrative.get("implications", []), "recommendations": narrative.get("recommendations", []),
-        "assumptions": intent.get("assumptions", []), "limitations": build_limitations(facts, dq, processed), "methodology": METHODOLOGY,
-        "citations": citations, "narrative_source": narrative_source, "verification": verification,
+        "findings": findings,
+        "implications": narrative.get("implications", []),
+        "recommendations": narrative.get("recommendations", []),
+        "assumptions": intent.get("assumptions", []),
+        "limitations": build_limitations(facts, dq, processed),
+        "methodology": METHODOLOGY,
+        "citations": citations,
+        "narrative_source": narrative_source,
+        "verification": verification,
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
     }

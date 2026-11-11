@@ -55,9 +55,11 @@ async def main(a: argparse.Namespace) -> int:
     sub = sorted(r[2] for r in results)
     ok = sum(1 for r in results if r[0] in ("completed", "degraded"))
     p = lambda xs, q: xs[min(len(xs) - 1, int(len(xs) * q))]  # noqa: E731
-    print(f"{a.total} analyses, concurrency {a.concurrency}: {ok} succeeded, {a.total - ok} failed, wall {wall:.1f}s, throughput {a.total / wall:.2f}/s")
-    print(f"end-to-end latency  p50 {statistics.median(lat):.2f}s  p95 {p(lat, .95):.2f}s  max {lat[-1]:.2f}s")
-    print(f"POST /analyses (accept)  p50 {statistics.median(sub) * 1000:.0f}ms  p95 {p(sub, .95) * 1000:.0f}ms")
+    print(
+        f"{a.total} analyses, concurrency {a.concurrency}: {ok} succeeded, {a.total - ok} failed, wall {wall:.1f}s, throughput {a.total / wall:.2f}/s"
+    )
+    print(f"end-to-end latency  p50 {statistics.median(lat):.2f}s  p95 {p(lat, 0.95):.2f}s  max {lat[-1]:.2f}s")
+    print(f"POST /analyses (accept)  p50 {statistics.median(sub) * 1000:.0f}ms  p95 {p(sub, 0.95) * 1000:.0f}ms")
     statuses: dict[str, int] = {}
     for r in results:
         statuses[r[0]] = statuses.get(r[0], 0) + 1

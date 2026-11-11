@@ -51,7 +51,9 @@ class RunContext:
     stage_status: dict[str, str] = field(default_factory=dict)
 
     async def llm(self, agent: str, req: LLMRequest) -> LLMResponse:
-        return await self.router.complete(req, agent=agent, emit=self.emit, tracker=self.tracker, faults=self.faults, analysis_id=self.analysis_id)
+        return await self.router.complete(
+            req, agent=agent, emit=self.emit, tracker=self.tracker, faults=self.faults, analysis_id=self.analysis_id
+        )
 
     def warn(self, agent: str, msg: str) -> None:
         self.warnings.append(msg)

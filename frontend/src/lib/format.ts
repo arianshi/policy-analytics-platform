@@ -26,6 +26,11 @@ export function compactNumber(v: number): string {
 }
 
 export const STATUS_LABEL: Record<string, string> = {
-  queued: "Queued", running: "Running", completed: "Completed", degraded: "Completed with fallbacks", failed: "Failed",
-  needs_clarification: "Needs clarification", cancelled: "Cancelled",
+  queued: "Queued",
+  running: "Running",
+  completed: "Completed",
+  degraded: "Completed with fallbacks",
+  failed: "Failed",
+  needs_clarification: "Needs clarification",
+  cancelled: "Cancelled",
 };

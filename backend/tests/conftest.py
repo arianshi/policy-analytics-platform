@@ -22,8 +22,18 @@ NOW_YEAR = 2026
 
 @pytest.fixture
 def settings(tmp_path: Path) -> Settings:
-    return Settings(live_data=False, runtime_dir=tmp_path / "var", llm_provider_order="offline", http_backoff_s=0.0, rate_limit_per_min=0,
-                    openai_api_key="", gemini_api_key="", azure_openai_api_key="", bedrock_enabled=False, fault_injection="")
+    return Settings(
+        live_data=False,
+        runtime_dir=tmp_path / "var",
+        llm_provider_order="offline",
+        http_backoff_s=0.0,
+        rate_limit_per_min=0,
+        openai_api_key="",
+        gemini_api_key="",
+        azure_openai_api_key="",
+        bedrock_enabled=False,
+        fault_injection="",
+    )
 
 
 class ScriptedProvider(LLMProvider):
@@ -51,15 +61,32 @@ def scripted():
     return ScriptedProvider
 
 
-def make_ctx(settings: Settings, *, query: str = HEADLINE, providers: list[LLMProvider] | None = None, faults: str = "",
-             registry: DataRegistry | None = None, events: list | None = None) -> RunContext:
+def make_ctx(
+    settings: Settings,
+    *,
+    query: str = HEADLINE,
+    providers: list[LLMProvider] | None = None,
+    faults: str = "",
+    registry: DataRegistry | None = None,
+    events: list | None = None,
+) -> RunContext:
     router = LLMRouter(providers if providers is not None else build_providers(settings), settings)
     log = events if events is not None else []
 
     def emit(agent, type_, message, data=None):
         log.append((agent, type_, message, data or {}))
 
-    ctx = RunContext("test", query, settings, registry or DataRegistry(settings), router, FaultPlan.parse(faults), emit, NOW_YEAR, CostTracker(1.0))
+    ctx = RunContext(
+        "test",
+        query,
+        settings,
+        registry or DataRegistry(settings),
+        router,
+        FaultPlan.parse(faults),
+        emit,
+        NOW_YEAR,
+        CostTracker(1.0),
+    )
     ctx.events = log  # type: ignore[attr-defined]
     return ctx
 

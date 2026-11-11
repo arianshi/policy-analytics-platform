@@ -11,20 +11,40 @@ class FakeWS {
   onerror: (() => void) | null = null;
   onclose: (() => void) | null = null;
   closed = false;
-  constructor(public url: string) { FakeWS.instances.push(this); }
-  close() { this.closed = true; this.onclose?.(); }
-  send(e: unknown) { this.onmessage?.({ data: JSON.stringify(e) }); }
+  constructor(public url: string) {
+    FakeWS.instances.push(this);
+  }
+  close() {
+    this.closed = true;
+    this.onclose?.();
+  }
+  send(e: unknown) {
+    this.onmessage?.({ data: JSON.stringify(e) });
+  }
 }
 
-beforeEach(() => { FakeWS.instances = []; vi.stubGlobal("WebSocket", FakeWS); });
-afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers(); });
+beforeEach(() => {
+  FakeWS.instances = [];
+  vi.stubGlobal("WebSocket", FakeWS);
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+  vi.useRealTimers();
+});
 
 describe("useAnalysisStream", () => {
   it("collects live events in order, ignores duplicates and pings, and reports completion", async () => {
     const { result } = renderHook(() => useAnalysisStream("a1"));
     const ws = FakeWS.instances[0]!;
     expect(ws.url).toMatch(/ws:\/\/.+\/ws\/analyses\/a1/);
-    act(() => { ws.onopen?.(); ws.send(ev(1, "coordinator", "thought", "plan")); ws.send(ev(1, "coordinator", "thought", "plan")); ws.send({ ...ev(2, "x", "ping", "") }); ws.send(ev(3, "extraction", "action", "fetch")); });
+    act(() => {
+      ws.onopen?.();
+      ws.send(ev(1, "coordinator", "thought", "plan"));
+      ws.send(ev(1, "coordinator", "thought", "plan"));
+      ws.send({ ...ev(2, "x", "ping", "") });
+      ws.send(ev(3, "extraction", "action", "fetch"));
+    });
     expect(result.current.events.map((e) => e.seq)).toEqual([1, 3]);
     expect(result.current.transport).toBe("ws");
     expect(result.current.done).toBe(false);
@@ -33,7 +53,9 @@ describe("useAnalysisStream", () => {
   });
 
   it("falls back to polling when the socket drops mid-run, resuming after the last seen event", async () => {
-    const getEvents = vi.spyOn(api, "getEvents").mockResolvedValueOnce({ events: [ev(2, "analytics", "thought", "t")] })
+    const getEvents = vi
+      .spyOn(api, "getEvents")
+      .mockResolvedValueOnce({ events: [ev(2, "analytics", "thought", "t")] })
       .mockResolvedValueOnce({ events: [ev(3, "system", "done", "d")] });
     const { result } = renderHook(() => useAnalysisStream("a1"));
     const ws = FakeWS.instances[0]!;
@@ -47,7 +69,9 @@ describe("useAnalysisStream", () => {
   });
 
   it("never shows another analysis' events after the id changes, and closes the old socket", () => {
-    const { result, rerender } = renderHook(({ id }: { id: string | null }) => useAnalysisStream(id), { initialProps: { id: "a1" as string | null } });
+    const { result, rerender } = renderHook(({ id }: { id: string | null }) => useAnalysisStream(id), {
+      initialProps: { id: "a1" as string | null },
+    });
     act(() => FakeWS.instances[0]!.send(ev(1, "coordinator", "thought", "old")));
     expect(result.current.events).toHaveLength(1);
     rerender({ id: "a2" });

@@ -58,7 +58,9 @@ def test_negative_count_rejected():
 
 
 def test_bad_years_dropped_with_examples():
-    df, rep = clean(MOM_COUNT, frame([("2O22", "ict", "5"), ("2021", "ict", "4"), ("1850", "ict", "3"), ("2030", "ict", "9")]), now_year=2026)
+    df, rep = clean(
+        MOM_COUNT, frame([("2O22", "ict", "5"), ("2021", "ict", "4"), ("1850", "ict", "3"), ("2030", "ict", "9")]), now_year=2026
+    )
     assert df.year.tolist() == [2021]
     issue = next(i for i in rep.issues if i.code == "invalid_year")
     assert issue.rows == 3 and "2O22" in issue.examples
@@ -99,8 +101,17 @@ def test_change_metrics_are_exempt_from_spike_detection():
 
 
 def test_aggregation_sums_dimensions():
-    df = pd.DataFrame({"year": ["2020"] * 4, "sector": ["ict"] * 4, "sector_label": ["x"] * 4, "value": ["1", "2", "3", "4"], "unit": ["persons"] * 4,
-                       "age": ["a", "a", "b", "b"], "sex": ["m", "f", "m", "f"]})
+    df = pd.DataFrame(
+        {
+            "year": ["2020"] * 4,
+            "sector": ["ict"] * 4,
+            "sector_label": ["x"] * 4,
+            "value": ["1", "2", "3", "4"],
+            "unit": ["persons"] * 4,
+            "age": ["a", "a", "b", "b"],
+            "sex": ["m", "f", "m", "f"],
+        }
+    )
     out, rep = clean(SPEC_BY_KEY["mom.employed_residents"], Normalised(df, ["age", "sex"], "sum"), now_year=2026)
     assert out.value.tolist() == [10.0] and "aggregated" in codes(rep)
 
@@ -126,7 +137,13 @@ def test_missing_required_column_is_a_schema_error():
 
 
 def test_unmapped_industries_are_dropped_and_disclosed():
-    raw = pd.DataFrame({"year": ["2020", "2020"], "industry": ["information and communications", "air transport and supporting services"], "job_vacancy": ["5", "6"]})
+    raw = pd.DataFrame(
+        {
+            "year": ["2020", "2020"],
+            "industry": ["information and communications", "air transport and supporting services"],
+            "job_vacancy": ["5", "6"],
+        }
+    )
     n = normalise(MOM_COUNT, raw)
     assert len(n.df) == 1 and any("outside the sector ontology" in note for note in n.notes)
 
@@ -170,7 +187,13 @@ def test_internal_mock_defects_are_all_detected(processed):
     assert {"invalid_year", "missing_values", "out_of_domain", "duplicate_rows", "isolated_spike", "mock_data"} <= codes(rep)
     assert rep.score < 80 and processed["internal.tech_programmes"].prov.is_mock
     df = processed["internal.tech_programmes"].df
-    assert set(df.sector) == {"ict", "finance", "manufacturing", "health", "wholesale_retail"}  # 'ICT', 'Info-comm' variants resolved
+    assert set(df.sector) == {
+        "ict",
+        "finance",
+        "manufacturing",
+        "health",
+        "wholesale_retail",
+    }  # 'ICT', 'Info-comm' variants resolved
     assert (df.value > 0).all()
 
 

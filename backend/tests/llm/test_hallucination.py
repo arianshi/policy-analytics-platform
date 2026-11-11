@@ -29,19 +29,26 @@ def codes(res):
 # -------------------------------------------------------------------------------- positives
 def test_template_narrative_is_fully_grounded(facts):
     store, fd = facts
-    items = [Item(f["title"], f["text"], f["fact_ids"]) for f in template.build_findings(fd)] + [Item("imp", i["text"], i["fact_ids"]) for i in template.build_implications(fd)]
+    items = [Item(f["title"], f["text"], f["fact_ids"]) for f in template.build_findings(fd)] + [
+        Item("imp", i["text"], i["fact_ids"]) for i in template.build_implications(fd)
+    ]
     res = verify_items(items, store, VCTX)
     assert res.passed and res.numbers_checked > 40 and res.grounding_score == 1.0
 
 
-@pytest.mark.parametrize("text", [
-    "Employed residents in the sector reached 139,200 in 2024.",
-    "Employment reached about 139.2k in 2024, up from 111.6k in 2020.",  # k-suffix
-    "Growth of 24.7% over the period.", "Growth of roughly 25% over the period.",  # rounding to integer
-    "Employment grew 5.7 per cent a year.", "Employment grew 5.7 percent a year compounded.",
-    "Growth was 24.7 percent in total.",
-    "That is a rise of 27,600 workers.",  # derived: 139,200 - 111,600
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Employed residents in the sector reached 139,200 in 2024.",
+        "Employment reached about 139.2k in 2024, up from 111.6k in 2020.",  # k-suffix
+        "Growth of 24.7% over the period.",
+        "Growth of roughly 25% over the period.",  # rounding to integer
+        "Employment grew 5.7 per cent a year.",
+        "Employment grew 5.7 percent a year compounded.",
+        "Growth was 24.7 percent in total.",
+        "That is a rise of 27,600 workers.",  # derived: 139,200 - 111,600
+    ],
+)
 def test_faithful_paraphrases_are_accepted(facts, text):
     store, _ = facts
     res = check(store, text, ["F1"])
@@ -55,15 +62,18 @@ def test_money_scales_are_understood(facts):
 
 
 # ------------------------------------------------------------------------------- negatives
-@pytest.mark.parametrize("text,code", [
-    ("Employed residents rose to 150,000 in 2024.", "unsupported_number"),
-    ("Employment grew by 31.4% over the period.", "unsupported_number"),
-    ("The sector grew 5.7% a year and 8.8% overall.", "unsupported_number"),
-    ("Employment reached 139,200 in 2031.", "unsupported_year"),
-    ("Employment reached 139,200 according to IRAS.", "unsupported_source"),
-    ("The IMF reports employment of 139,200.", "unsupported_source"),
-    ("Employment reached 139,200 in 2024.", "unknown_fact"),  # cites F999 below
-])
+@pytest.mark.parametrize(
+    "text,code",
+    [
+        ("Employed residents rose to 150,000 in 2024.", "unsupported_number"),
+        ("Employment grew by 31.4% over the period.", "unsupported_number"),
+        ("The sector grew 5.7% a year and 8.8% overall.", "unsupported_number"),
+        ("Employment reached 139,200 in 2031.", "unsupported_year"),
+        ("Employment reached 139,200 according to IRAS.", "unsupported_source"),
+        ("The IMF reports employment of 139,200.", "unsupported_source"),
+        ("Employment reached 139,200 in 2024.", "unknown_fact"),  # cites F999 below
+    ],
+)
 def test_fabrications_are_detected(facts, text, code):
     store, _ = facts
     ids = ["F999"] if code == "unknown_fact" else ["F1"]
@@ -107,7 +117,7 @@ def test_mutation_testing_detects_every_altered_number(facts):
             val = float(raw.replace(",", ""))
             new = val * 1.37 + 3.1
             fmt = f"{new:,.0f}" if "," in raw else f"{new:.{len(raw.split('.')[1])}f}"
-            mutated = f["text"][: m.start(1)] + fmt + f["text"][m.end(1):]
+            mutated = f["text"][: m.start(1)] + fmt + f["text"][m.end(1) :]
             attempts += 1
             if codes(check(store, mutated, f["fact_ids"])):
                 detected += 1
@@ -125,9 +135,18 @@ def run_with(settings, providers):
     return ctx, asyncio.run(run_analysis(ctx))
 
 
-HALLUCINATION = {"findings": [{"title": "Boom", "text": "Tech employment surged 85.3% to 250,000 workers, caused by the IMDA Tech Pass, according to IRAS.", "fact_ids": ["F1"]}],
-                 "implications": [{"text": "Wages doubled in 2031.", "fact_ids": ["F1"]}], "executive_summary": {"text": "Everything is 91.7% better.", "fact_ids": ["F1"]},
-                 "recommendations": [{"text": "Hire 40,000 more.", "fact_ids": []}]}
+HALLUCINATION = {
+    "findings": [
+        {
+            "title": "Boom",
+            "text": "Tech employment surged 85.3% to 250,000 workers, caused by the IMDA Tech Pass, according to IRAS.",
+            "fact_ids": ["F1"],
+        }
+    ],
+    "implications": [{"text": "Wages doubled in 2031.", "fact_ids": ["F1"]}],
+    "executive_summary": {"text": "Everything is 91.7% better.", "fact_ids": ["F1"]},
+    "recommendations": [{"text": "Hire 40,000 more.", "fact_ids": []}],
+}
 
 
 def test_hostile_llm_never_reaches_the_report(module_settings):
@@ -139,7 +158,11 @@ def test_hostile_llm_never_reaches_the_report(module_settings):
     text = json.dumps(result["report"])
     for forbidden in ("85.3", "250,000", "IRAS", "IMDA", "91.7", "2031", "40,000"):
         assert forbidden not in text, forbidden
-    assert result["verification"]["passed"] and result["verification"]["template_fallback"] and result["report"]["narrative_source"] == "template-fallback"
+    assert (
+        result["verification"]["passed"]
+        and result["verification"]["template_fallback"]
+        and result["report"]["narrative_source"] == "template-fallback"
+    )
     assert sum(1 for r in p.calls if r.task == "generate_insights") == 2  # first draft + one revision, then the safe fallback
     warnings = [e[2] for e in ctx.events if e[0] == "reporter" and e[1] == "warning"]
     assert any("unsupported_number" in w for w in warnings) and any("unsupported_source" in w for w in warnings)
@@ -152,11 +175,17 @@ def test_honest_llm_output_is_used_as_is(module_settings):
             return json.dumps({"findings": template.build_findings(fd), "implications": template.build_implications(fd)})
         if req.task == "write_report":
             fd = req.context["facts"]
-            return json.dumps({"executive_summary": template.build_summary(fd), "recommendations": template.build_recommendations(fd)})
+            return json.dumps(
+                {"executive_summary": template.build_summary(fd), "recommendations": template.build_recommendations(fd)}
+            )
         return "garbled"
 
     _ctx, result = run_with(module_settings, [ScriptedProvider("honest", honest)])
-    assert result["report"]["narrative_source"] == "llm:honest" and result["verification"]["passed"] and not result["verification"]["template_fallback"]
+    assert (
+        result["report"]["narrative_source"] == "llm:honest"
+        and result["verification"]["passed"]
+        and not result["verification"]["template_fallback"]
+    )
     assert result["verification"]["revisions"] == 0
 
 
@@ -168,16 +197,24 @@ def test_llm_that_corrects_itself_after_feedback(module_settings):
             state["n"] += 1
             if state["n"] == 1:
                 return json.dumps(HALLUCINATION)
-            assert "FAILED verification" in req.prompt and "unsupported_number" in req.prompt  # the specific failures were fed back
+            assert (
+                "FAILED verification" in req.prompt and "unsupported_number" in req.prompt
+            )  # the specific failures were fed back
             fd = req.context["facts"]
             return json.dumps({"findings": template.build_findings(fd), "implications": template.build_implications(fd)})
         if req.task == "write_report":
             fd = req.context["facts"]
-            return json.dumps({"executive_summary": template.build_summary(fd), "recommendations": template.build_recommendations(fd)})
+            return json.dumps(
+                {"executive_summary": template.build_summary(fd), "recommendations": template.build_recommendations(fd)}
+            )
         return "garbled"
 
     _, result = run_with(module_settings, [ScriptedProvider("learner", learner)])
-    assert result["verification"]["revisions"] == 1 and not result["verification"]["template_fallback"] and result["report"]["narrative_source"] == "llm:learner"
+    assert (
+        result["verification"]["revisions"] == 1
+        and not result["verification"]["template_fallback"]
+        and result["report"]["narrative_source"] == "llm:learner"
+    )
 
 
 def test_hallucinated_summary_alone_is_replaced(module_settings):
@@ -186,7 +223,9 @@ def test_hallucinated_summary_alone_is_replaced(module_settings):
         if req.task == "generate_insights":
             return json.dumps({"findings": template.build_findings(fd), "implications": template.build_implications(fd)})
         if req.task == "write_report":
-            return json.dumps({"executive_summary": {"text": "Employment tripled to 400,000.", "fact_ids": ["F1"]}, "recommendations": []})
+            return json.dumps(
+                {"executive_summary": {"text": "Employment tripled to 400,000.", "fact_ids": ["F1"]}, "recommendations": []}
+            )
         return "garbled"
 
     _, result = run_with(module_settings, [ScriptedProvider("mixed", mixed)])

@@ -67,8 +67,10 @@ class Database:
     def create_analysis(self, analysis_id: str, query: str, options: dict[str, Any]) -> None:
         t = now()
         with self._lock, self._conn:
-            self._conn.execute("INSERT INTO analyses (id, query, status, options, created_at, updated_at) VALUES (?,?,?,?,?,?)",
-                               (analysis_id, query, "queued", json.dumps(options), t, t))
+            self._conn.execute(
+                "INSERT INTO analyses (id, query, status, options, created_at, updated_at) VALUES (?,?,?,?,?,?)",
+                (analysis_id, query, "queued", json.dumps(options), t, t),
+            )
 
     def set_status(self, analysis_id: str, status: str) -> None:
         with self._lock, self._conn:
@@ -79,8 +81,18 @@ class Database:
         with self._lock, self._conn:
             self._conn.execute(
                 "UPDATE analyses SET status=?, result=?, error=?, title=?, facts=?, duration_ms=?, updated_at=?, completed_at=? WHERE id=?",
-                (status, json.dumps(result, default=str) if result else None, error or None, title, len((result or {}).get("facts", [])),
-                 (result or {}).get("duration_ms"), now(), now(), analysis_id))
+                (
+                    status,
+                    json.dumps(result, default=str) if result else None,
+                    error or None,
+                    title,
+                    len((result or {}).get("facts", [])),
+                    (result or {}).get("duration_ms"),
+                    now(),
+                    now(),
+                    analysis_id,
+                ),
+            )
 
     def get_analysis(self, analysis_id: str) -> dict[str, Any] | None:
         with self._lock:
@@ -89,7 +101,9 @@ class Database:
 
     def list_analyses(self, limit: int = 30, offset: int = 0) -> list[dict[str, Any]]:
         with self._lock:
-            rows = self._conn.execute("SELECT * FROM analyses ORDER BY created_at DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
+            rows = self._conn.execute(
+                "SELECT * FROM analyses ORDER BY created_at DESC LIMIT ? OFFSET ?", (limit, offset)
+            ).fetchall()
         return [self._analysis_row(r, full=False) for r in rows]
 
     def delete_analysis(self, analysis_id: str) -> bool:
@@ -103,30 +117,71 @@ class Database:
         with self._lock, self._conn:
             return self._conn.execute(
                 "UPDATE analyses SET status='failed', error='Interrupted by a server restart', completed_at=?, updated_at=? WHERE status IN ('queued','running')",
-                (now(), now())).rowcount
+                (now(), now()),
+            ).rowcount
 
     @staticmethod
     def _analysis_row(row: sqlite3.Row, *, full: bool) -> dict[str, Any]:
-        d = {k: row[k] for k in ("id", "query", "status", "title", "error", "facts", "duration_ms", "created_at", "updated_at", "completed_at")}
+        d = {
+            k: row[k]
+            for k in (
+                "id",
+                "query",
+                "status",
+                "title",
+                "error",
+                "facts",
+                "duration_ms",
+                "created_at",
+                "updated_at",
+                "completed_at",
+            )
+        }
         d["options"] = json.loads(row["options"] or "{}")
         if full:
             d["result"] = json.loads(row["result"]) if row["result"] else None
         return d
 
     # ------------------------------------------------------------------ events
-    def add_event(self, analysis_id: str, agent: str, type_: str, message: str, data: dict[str, Any] | None, ts: str | None = None) -> dict[str, Any]:
+    def add_event(
+        self, analysis_id: str, agent: str, type_: str, message: str, data: dict[str, Any] | None, ts: str | None = None
+    ) -> dict[str, Any]:
         with self._lock, self._conn:
-            seq = (self._conn.execute("SELECT COALESCE(MAX(seq),0)+1 FROM events WHERE analysis_id=?", (analysis_id,)).fetchone()[0])
+            seq = self._conn.execute("SELECT COALESCE(MAX(seq),0)+1 FROM events WHERE analysis_id=?", (analysis_id,)).fetchone()[
+                0
+            ]
             ts = ts or now()
-            self._conn.execute("INSERT INTO events (analysis_id, seq, ts, agent, type, message, data) VALUES (?,?,?,?,?,?,?)",
-                               (analysis_id, seq, ts, agent, type_, message, json.dumps(data or {}, default=str)))
-        return {"analysis_id": analysis_id, "seq": seq, "ts": ts, "agent": agent, "type": type_, "message": message, "data": data or {}}
+            self._conn.execute(
+                "INSERT INTO events (analysis_id, seq, ts, agent, type, message, data) VALUES (?,?,?,?,?,?,?)",
+                (analysis_id, seq, ts, agent, type_, message, json.dumps(data or {}, default=str)),
+            )
+        return {
+            "analysis_id": analysis_id,
+            "seq": seq,
+            "ts": ts,
+            "agent": agent,
+            "type": type_,
+            "message": message,
+            "data": data or {},
+        }
 
     def get_events(self, analysis_id: str, after: int = 0) -> list[dict[str, Any]]:
         with self._lock:
-            rows = self._conn.execute("SELECT * FROM events WHERE analysis_id=? AND seq>? ORDER BY seq", (analysis_id, after)).fetchall()
-        return [{"analysis_id": r["analysis_id"], "seq": r["seq"], "ts": r["ts"], "agent": r["agent"], "type": r["type"], "message": r["message"],
-                 "data": json.loads(r["data"])} for r in rows]
+            rows = self._conn.execute(
+                "SELECT * FROM events WHERE analysis_id=? AND seq>? ORDER BY seq", (analysis_id, after)
+            ).fetchall()
+        return [
+            {
+                "analysis_id": r["analysis_id"],
+                "seq": r["seq"],
+                "ts": r["ts"],
+                "agent": r["agent"],
+                "type": r["type"],
+                "message": r["message"],
+                "data": json.loads(r["data"]),
+            }
+            for r in rows
+        ]
 
     # ------------------------------------------------------------------ datasets
     def store_dataset(self, p: ProcessedDataset) -> int:
@@ -135,22 +190,51 @@ class Database:
             self._conn.execute("DELETE FROM dataset_rows WHERE dataset_key=?", (p.spec.key,))
             self._conn.executemany(
                 "INSERT INTO dataset_rows (dataset_key, year, sector, sector_label, metric, value, unit) VALUES (?,?,?,?,?,?,?)",
-                [(p.spec.key, int(r.year), r.sector if isinstance(r.sector, str) else None, r.sector_label, r.metric, float(r.value), r.unit) for r in df.itertuples()])
+                [
+                    (
+                        p.spec.key,
+                        int(r.year),
+                        r.sector if isinstance(r.sector, str) else None,
+                        r.sector_label,
+                        r.metric,
+                        float(r.value),
+                        r.unit,
+                    )
+                    for r in df.itertuples()
+                ],
+            )
             self._conn.execute(
                 "INSERT OR REPLACE INTO datasets (key, source, title, mode, degraded, is_mock, retrieved_at, rows, dq_score, dq, provenance, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                (p.spec.key, p.spec.source, p.spec.title, p.prov.mode, int(p.prov.degraded), int(p.prov.is_mock), p.prov.retrieved_at, len(df), p.dq.score,
-                 json.dumps(p.dq.to_dict(), default=str), json.dumps(p.prov.to_dict()), now()))
+                (
+                    p.spec.key,
+                    p.spec.source,
+                    p.spec.title,
+                    p.prov.mode,
+                    int(p.prov.degraded),
+                    int(p.prov.is_mock),
+                    p.prov.retrieved_at,
+                    len(df),
+                    p.dq.score,
+                    json.dumps(p.dq.to_dict(), default=str),
+                    json.dumps(p.prov.to_dict()),
+                    now(),
+                ),
+            )
         return len(df)
 
     def list_datasets(self) -> list[dict[str, Any]]:
         with self._lock:
-            rows = self._conn.execute("SELECT key, source, title, mode, degraded, is_mock, retrieved_at, rows, dq_score, updated_at FROM datasets ORDER BY key").fetchall()
+            rows = self._conn.execute(
+                "SELECT key, source, title, mode, degraded, is_mock, retrieved_at, rows, dq_score, updated_at FROM datasets ORDER BY key"
+            ).fetchall()
         return [dict(r) for r in rows]
 
     def dataset_rows(self, key: str, limit: int = 200) -> list[dict[str, Any]]:
         with self._lock:
-            rows = self._conn.execute("SELECT year, sector, sector_label, metric, value, unit FROM dataset_rows WHERE dataset_key=? ORDER BY sector, year LIMIT ?",
-                                      (key, limit)).fetchall()
+            rows = self._conn.execute(
+                "SELECT year, sector, sector_label, metric, value, unit FROM dataset_rows WHERE dataset_key=? ORDER BY sector, year LIMIT ?",
+                (key, limit),
+            ).fetchall()
         return [dict(r) for r in rows]
 
     # ------------------------------------------------------------------ llm
@@ -158,12 +242,26 @@ class Database:
         with self._lock, self._conn:
             self._conn.execute(
                 "INSERT INTO llm_calls (analysis_id, ts, agent, task, provider, model, input_tokens, output_tokens, cost_usd, latency_ms, ok, error) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                (rec.get("analysis_id"), now(), rec.get("agent"), rec.get("task"), rec.get("provider"), rec.get("model"), rec.get("input_tokens", 0),
-                 rec.get("output_tokens", 0), rec.get("cost_usd", 0.0), rec.get("latency_ms", 0), int(bool(rec.get("ok"))), rec.get("error", "")))
+                (
+                    rec.get("analysis_id"),
+                    now(),
+                    rec.get("agent"),
+                    rec.get("task"),
+                    rec.get("provider"),
+                    rec.get("model"),
+                    rec.get("input_tokens", 0),
+                    rec.get("output_tokens", 0),
+                    rec.get("cost_usd", 0.0),
+                    rec.get("latency_ms", 0),
+                    int(bool(rec.get("ok"))),
+                    rec.get("error", ""),
+                ),
+            )
 
     def llm_totals(self) -> list[dict[str, Any]]:
         with self._lock:
             rows = self._conn.execute(
                 "SELECT provider, model, SUM(ok) AS ok_calls, COUNT(*)-SUM(ok) AS failed_calls, SUM(input_tokens) AS input_tokens, SUM(output_tokens) AS output_tokens, "
-                "ROUND(SUM(cost_usd),6) AS cost_usd, CAST(AVG(CASE WHEN ok=1 THEN latency_ms END) AS INTEGER) AS avg_latency_ms FROM llm_calls GROUP BY provider, model").fetchall()
+                "ROUND(SUM(cost_usd),6) AS cost_usd, CAST(AVG(CASE WHEN ok=1 THEN latency_ms END) AS INTEGER) AS avg_latency_ms FROM llm_calls GROUP BY provider, model"
+            ).fetchall()
         return [dict(r) for r in rows]

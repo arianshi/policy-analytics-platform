@@ -15,7 +15,9 @@ export function pivotSeries(series: ChartSeries[]): { rows: Row[]; flagged: Set<
       if (p.flag) flagged.add(`${s.name}|${key}`);
     }
   }
-  const rows = [...byX.values()].sort((a, b) => (typeof a.x === "number" && typeof b.x === "number" ? a.x - b.x : String(a.x).localeCompare(String(b.x))));
+  const rows = [...byX.values()].sort((a, b) =>
+    typeof a.x === "number" && typeof b.x === "number" ? a.x - b.x : String(a.x).localeCompare(String(b.x)),
+  );
   return { rows, flagged };
 }
 

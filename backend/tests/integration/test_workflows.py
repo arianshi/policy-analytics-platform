@@ -21,17 +21,45 @@ def actions(ctx, agent):
 async def test_headline_query_happy_path(run_analysis_offline):
     ctx, r = await run_analysis_offline()
     assert r["status"] == "completed" and not r["warnings"]
-    assert actions(ctx, "coordinator") == ["interpret_query", "plan_workflow", "delegate_extraction", "delegate_analytics", "delegate_reporting"]
+    assert actions(ctx, "coordinator") == [
+        "interpret_query",
+        "plan_workflow",
+        "delegate_extraction",
+        "delegate_analytics",
+        "delegate_reporting",
+    ]
     assert actions(ctx, "extraction") == ["search_catalog", "fetch_datasets", "validate_and_clean", "store_datasets"]
-    assert actions(ctx, "analytics") == ["check_scope", "analyze_trends", "compare_sectors", "analyze_relationships", "cross_source", "outlook"]
+    assert actions(ctx, "analytics") == [
+        "check_scope",
+        "analyze_trends",
+        "compare_sectors",
+        "analyze_relationships",
+        "cross_source",
+        "outlook",
+    ]
     assert actions(ctx, "reporter") == ["draft_findings", "verify_draft", "compose_report"]
     rep = r["report"]
     assert [f["title"] for f in rep["findings"]][:3] == ["Employment", "Hiring demand", "Churn and layoffs"]
     assert any("MOCK" in f["text"] for f in rep["findings"]), "mock data must be labelled in the narrative"
-    assert {c["dataset_key"] for c in rep["citations"]} >= {"mom.employed_residents", "singstat.gdp_by_industry", "internal.tech_programmes"}
+    assert {c["dataset_key"] for c in rep["citations"]} >= {
+        "mom.employed_residents",
+        "singstat.gdp_by_industry",
+        "internal.tech_programmes",
+    }
     assert len({d["key"].split(".")[0] for d in r["datasets"]}) == 3, "three different sources"
     kinds = {f["kind"] for f in r["facts"]}
-    assert {"growth", "peak", "trend", "comparison", "share", "correlation", "anomaly", "productivity", "pipeline", "context"} <= kinds
+    assert {
+        "growth",
+        "peak",
+        "trend",
+        "comparison",
+        "share",
+        "correlation",
+        "anomaly",
+        "productivity",
+        "pipeline",
+        "context",
+    } <= kinds
     assert r["intent"]["sectors"] == ["ict"] and r["llm"]["calls"] > 10 and r["llm"]["cost_usd"] == 0
 
 
@@ -65,16 +93,31 @@ async def test_schema_drift_in_one_source_is_contained(run_analysis_offline):
 async def test_live_schema_drift_recovers_through_snapshot(settings, tmp_path):
     s = settings.model_copy(update={"live_data": True, "runtime_dir": tmp_path / "rt"})
     body = (settings.snapshot_dir / "singstat_M015731.json").read_bytes()
-    drifted = json.dumps({"Data": {"row": [{"series": r["rowText"], "values": r["columns"]} for r in json.loads(body)["Data"]["row"]]}}).encode()
-    csv = {k: (settings.snapshot_dir / f"mom_{k}.csv").read_bytes() for k in ("employed_residents", "job_vacancies", "job_vacancy_rate", "retrenchments",
-                                                                              "recruitment_rate", "resignation_rate", "total_wage_change", "unemployment_rate")}
+    drifted = json.dumps(
+        {"Data": {"row": [{"series": r["rowText"], "values": r["columns"]} for r in json.loads(body)["Data"]["row"]]}}
+    ).encode()
+    csv = {
+        k: (settings.snapshot_dir / f"mom_{k}.csv").read_bytes()
+        for k in (
+            "employed_residents",
+            "job_vacancies",
+            "job_vacancy_rate",
+            "retrenchments",
+            "recruitment_rate",
+            "resignation_rate",
+            "total_wage_change",
+            "unemployment_rate",
+        )
+    }
 
     def handler(req: httpx.Request) -> httpx.Response:
         if "tablebuilder" in req.url.host:
             return httpx.Response(200, content=drifted)
         if req.url.path.endswith("/poll-download"):
             ds = req.url.path.split("/")[-2]
-            return httpx.Response(200, json={"code": 0, "data": {"status": "DOWNLOAD_SUCCESS", "url": f"https://s3.test/{ds}.csv"}})
+            return httpx.Response(
+                200, json={"code": 0, "data": {"status": "DOWNLOAD_SUCCESS", "url": f"https://s3.test/{ds}.csv"}}
+            )
         from app.datasources.catalog import CATALOG
 
         ds = req.url.path.split("/")[-1].removesuffix(".csv")
@@ -117,13 +160,18 @@ async def test_sector_without_data_for_a_measure_reports_a_limitation_instead_of
 async def test_sub_sector_query(run_analysis_offline):
     _, r = await run_analysis_offline("IT services versus telecommunications job vacancies 2019-2024")
     assert r["intent"]["sectors"] == ["ict_it_services", "ict_telecom"] and r["status"] in ("completed", "degraded")
-    assert {f["sector"] for f in r["facts"] if f["metric"] == "job_vacancies" and f["kind"] == "growth"} == {"ict_it_services", "ict_telecom"}
+    assert {f["sector"] for f in r["facts"] if f["metric"] == "job_vacancies" and f["kind"] == "growth"} == {
+        "ict_it_services",
+        "ict_telecom",
+    }
 
 
 async def test_multi_sector_comparison(run_analysis_offline):
     _, r = await run_analysis_offline("Compare wage growth in finance and the technology sector since 2019")
     wage = [f for f in r["facts"] if f["metric"] == "total_wage_change" and f["kind"] == "growth"]
-    assert ({f["sector"] for f in wage} == {"finance", "ict"} and "Finance" in r["report"]["title"]) or "Financial" in r["report"]["title"]
+    assert ({f["sector"] for f in wage} == {"finance", "ict"} and "Finance" in r["report"]["title"]) or "Financial" in r[
+        "report"
+    ]["title"]
     assert any(f["kind"] == "comparison" for f in r["facts"]) and r["verification"]["passed"]
 
 
@@ -137,7 +185,11 @@ async def test_forecast_is_withheld_when_the_latest_point_breaks_the_trend(run_a
 async def test_forecast_is_produced_for_a_stable_series(run_analysis_offline):
     _, r = await run_analysis_offline("Forecast employment in the manufacturing sector for the next two years")
     fc = [f for f in r["facts"] if f["kind"] == "forecast"]
-    assert fc and "80% prediction interval" in fc[0]["statement"] and fc[0]["values"]["lower"]["v"] < fc[0]["values"]["point"]["v"] < fc[0]["values"]["upper"]["v"]
+    assert (
+        fc
+        and "80% prediction interval" in fc[0]["statement"]
+        and fc[0]["values"]["lower"]["v"] < fc[0]["values"]["point"]["v"] < fc[0]["values"]["upper"]["v"]
+    )
     assert any(c["id"].startswith("chart-forecast") for c in r["charts"])
 
 
@@ -155,15 +207,26 @@ async def test_charts_are_well_formed(run_analysis_offline):
     for c in r["charts"]:
         assert c["id"] not in ids
         ids.add(c["id"])
-        assert (c["type"] in ("line", "bar", "scatter") and c["series"] and all(s["data"] for s in c["series"]) and c["sources"]) or c["id"] == "chart-productivity"
+        assert (
+            c["type"] in ("line", "bar", "scatter") and c["series"] and all(s["data"] for s in c["series"]) and c["sources"]
+        ) or c["id"] == "chart-productivity"
         for s in c["series"]:
             assert all("x" in p and "y" in p and isinstance(p["y"], int | float) for p in s["data"])
     assert any(c["type"] == "scatter" for c in r["charts"]) and any(c["type"] == "bar" for c in r["charts"])
-    flagged = [p for c in r["charts"] if c["id"].startswith("chart-trend-job_vacancies") for p in c["series"][0]["data"] if p.get("flag")]
+    flagged = [
+        p for c in r["charts"] if c["id"].startswith("chart-trend-job_vacancies") for p in c["series"][0]["data"] if p.get("flag")
+    ]
     assert [p["x"] for p in flagged] == [2021]
 
 
-@pytest.mark.parametrize("q", [HEADLINE, "Compare wage growth in finance and the technology sector since 2019", "Forecast employment in the manufacturing sector for the next two years"])
+@pytest.mark.parametrize(
+    "q",
+    [
+        HEADLINE,
+        "Compare wage growth in finance and the technology sector since 2019",
+        "Forecast employment in the manufacturing sector for the next two years",
+    ],
+)
 async def test_every_report_passes_its_own_hallucination_check(run_analysis_offline, q):
     _, r = await run_analysis_offline(q)
     assert r["verification"]["passed"] and r["verification"]["grounding_score"] == 1.0 and r["verification"]["error_count"] == 0

@@ -39,9 +39,13 @@ async def get_with_retry(
                 url, params=params, timeout=settings.http_timeout_s, headers={"User-Agent": settings.user_agent}
             )
         except httpx.TimeoutException as exc:
-            last = DataSourceError(f"{source}: request timed out ({exc.__class__.__name__})", code="timeout", source=source, retryable=True)
+            last = DataSourceError(
+                f"{source}: request timed out ({exc.__class__.__name__})", code="timeout", source=source, retryable=True
+            )
         except httpx.HTTPError as exc:
-            last = DataSourceError(f"{source}: network error ({exc.__class__.__name__}: {exc})", code="unavailable", source=source, retryable=True)
+            last = DataSourceError(
+                f"{source}: network error ({exc.__class__.__name__}: {exc})", code="unavailable", source=source, retryable=True
+            )
         else:
             if resp.status_code == 429:
                 last = DataSourceError(f"{source}: rate limited (HTTP 429)", code="rate_limited", source=source, retryable=True)
@@ -50,7 +54,9 @@ async def get_with_retry(
                     await sleep(min(retry_after if retry_after is not None else _backoff(settings, attempt), 30.0))
                     continue
             elif resp.status_code >= 500:
-                last = DataSourceError(f"{source}: server error (HTTP {resp.status_code})", code="unavailable", source=source, retryable=True)
+                last = DataSourceError(
+                    f"{source}: server error (HTTP {resp.status_code})", code="unavailable", source=source, retryable=True
+                )
             elif resp.status_code == 404:
                 raise DataSourceError(f"{source}: not found (HTTP 404) for {url}", code="not_found", source=source)
             elif resp.status_code >= 400:

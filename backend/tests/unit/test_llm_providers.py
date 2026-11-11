@@ -28,7 +28,11 @@ def capture(response: httpx.Response):
 
 
 async def test_openai_request_shape_and_parsing():
-    t, seen = capture(httpx.Response(200, json={"choices": [{"message": {"content": '{"a":1}'}}], "usage": {"prompt_tokens": 11, "completion_tokens": 7}}))
+    t, seen = capture(
+        httpx.Response(
+            200, json={"choices": [{"message": {"content": '{"a":1}'}}], "usage": {"prompt_tokens": 11, "completion_tokens": 7}}
+        )
+    )
     comp = await OpenAIProvider("sk-test", "gpt-4o-mini", "https://api.openai.com/v1", t).complete(REQ, timeout_s=5)
     assert seen["url"] == "https://api.openai.com/v1/chat/completions" and seen["headers"]["authorization"] == "Bearer sk-test"
     b = seen["body"]
@@ -47,12 +51,24 @@ async def test_azure_uses_deployment_url_and_api_key_header():
 
 
 async def test_gemini_request_shape_and_parsing():
-    t, seen = capture(httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": '{"b":'}, {"text": "2}"}]}}],
-                                               "usageMetadata": {"promptTokenCount": 5, "candidatesTokenCount": 3}}))
-    comp = await GeminiProvider("g-key", "gemini-2.0-flash", "https://generativelanguage.googleapis.com/v1beta", t).complete(REQ, timeout_s=5)
+    t, seen = capture(
+        httpx.Response(
+            200,
+            json={
+                "candidates": [{"content": {"parts": [{"text": '{"b":'}, {"text": "2}"}]}}],
+                "usageMetadata": {"promptTokenCount": 5, "candidatesTokenCount": 3},
+            },
+        )
+    )
+    comp = await GeminiProvider("g-key", "gemini-2.0-flash", "https://generativelanguage.googleapis.com/v1beta", t).complete(
+        REQ, timeout_s=5
+    )
     assert seen["url"].endswith("/models/gemini-2.0-flash:generateContent") and seen["headers"]["x-goog-api-key"] == "g-key"
     assert seen["body"]["systemInstruction"]["parts"][0]["text"] == "SYS"
-    assert seen["body"]["generationConfig"]["responseMimeType"] == "application/json" and seen["body"]["generationConfig"]["maxOutputTokens"] == 123
+    assert (
+        seen["body"]["generationConfig"]["responseMimeType"] == "application/json"
+        and seen["body"]["generationConfig"]["maxOutputTokens"] == 123
+    )
     assert (comp.text, comp.input_tokens, comp.output_tokens) == ('{"b":2}', 5, 3)
 
 
@@ -113,7 +129,9 @@ def test_factory_honours_order_and_credentials():
     providers = build_providers(s)
     assert [p.name for p in providers] == ["gemini", "openai", "offline"]  # offline always appended last
     assert [p.name for p in providers if p.configured()] == ["openai", "offline"]
-    full = build_providers(Settings(azure_openai_endpoint="https://a", azure_openai_api_key="k", azure_openai_deployment="d", bedrock_enabled=True))
+    full = build_providers(
+        Settings(azure_openai_endpoint="https://a", azure_openai_api_key="k", azure_openai_deployment="d", bedrock_enabled=True)
+    )
     assert {p.name for p in full if p.configured()} == {"azure", "bedrock", "offline"}
 
 

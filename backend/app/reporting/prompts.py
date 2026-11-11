@@ -24,7 +24,9 @@ REPORT_SYSTEM = (
 
 
 def facts_payload(facts: list[dict[str, Any]]) -> str:
-    slim = [{"id": f["id"], "kind": f["kind"], "statement": f["statement"], "mock": f["mock"], "caveats": f["caveats"]} for f in facts]
+    slim = [
+        {"id": f["id"], "kind": f["kind"], "statement": f["statement"], "mock": f["mock"], "caveats": f["caveats"]} for f in facts
+    ]
     return json.dumps(slim, ensure_ascii=False)
 
 

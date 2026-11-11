@@ -22,11 +22,35 @@ THEMES: list[tuple[str, tuple[str, ...]]] = [
     ("Talent pipeline (MOCK internal data)", ("vacancies_per_completion", "programme_completions")),
     ("Outlook and context", ("unemployment_rate",)),
 ]
-_KIND_ORDER = {"growth": 0, "latest": 1, "peak": 2, "comparison": 3, "share": 4, "productivity": 5, "trend": 6, "correlation": 7, "anomaly": 8,
-               "pipeline": 9, "context": 10, "forecast": 11}
+_KIND_ORDER = {
+    "growth": 0,
+    "latest": 1,
+    "peak": 2,
+    "comparison": 3,
+    "share": 4,
+    "productivity": 5,
+    "trend": 6,
+    "correlation": 7,
+    "anomaly": 8,
+    "pipeline": 9,
+    "context": 10,
+    "forecast": 11,
+}
 # which facts a theme leads with when it has more than three: the story first, statistical detail last
-_PICK_ORDER = {"growth": 0, "peak": 1, "comparison": 2, "share": 3, "productivity": 4, "correlation": 5, "anomaly": 6, "latest": 7, "trend": 8,
-               "pipeline": 9, "context": 10, "forecast": 11}
+_PICK_ORDER = {
+    "growth": 0,
+    "peak": 1,
+    "comparison": 2,
+    "share": 3,
+    "productivity": 4,
+    "correlation": 5,
+    "anomaly": 6,
+    "latest": 7,
+    "trend": 8,
+    "pipeline": 9,
+    "context": 10,
+    "forecast": 11,
+}
 
 
 def _theme_of(f: dict[str, Any]) -> str | None:
@@ -55,7 +79,15 @@ def build_findings(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not group:
             continue
         # high-importance facts first, then the theme's headline measure, then story before statistics
-        group = sorted(group, key=lambda f: (0 if f["importance"] >= 0.8 else 1, _metric_rank(f, name), _PICK_ORDER.get(f["kind"], 99), int(f["id"][1:])))[:3]
+        group = sorted(
+            group,
+            key=lambda f: (
+                0 if f["importance"] >= 0.8 else 1,
+                _metric_rank(f, name),
+                _PICK_ORDER.get(f["kind"], 99),
+                int(f["id"][1:]),
+            ),
+        )[:3]
         group = sorted(group, key=lambda f: (_KIND_ORDER.get(f["kind"], 99), int(f["id"][1:])))
         out.append({"title": name, "text": " ".join(f["statement"] for f in group), "fact_ids": [f["id"] for f in group]})
     return out
@@ -78,31 +110,59 @@ def build_implications(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     retr = _find(facts, "growth", "retrenchments")
     if peak and "move_to_end" in peak["values"] and _v(peak, "move_to_end") < -25:
         sname = sector_name(peak.get("sector"))
-        text = (f"Hiring demand in {sname} has cooled sharply: job vacancies are {abs(_v(peak, 'move_to_end')):.1f}% below their {int(_v(peak, 'year'))} high "
-                f"of {fmt_count(_v(peak, 'value'))}.")
+        text = (
+            f"Hiring demand in {sname} has cooled sharply: job vacancies are {abs(_v(peak, 'move_to_end')):.1f}% below their {int(_v(peak, 'year'))} high "
+            f"of {fmt_count(_v(peak, 'value'))}."
+        )
         ids = [peak["id"]]
         if retr and "pct_change" in retr["values"]:
             text += f" Over the same window retrenchments changed by {fmt_pct(_v(retr, 'pct_change'), True)}, so support may need to shift from filling vacancies towards redeployment and reskilling."
             ids.append(retr["id"])
         out.append({"text": text, "fact_ids": ids})
     for f in facts:
-        if f["kind"] == "latest" and "change" in f["values"] and f.get("period") and abs(_v(f, "change")) >= 3 and f["statement"].startswith("Beyond"):
-            out.append({"text": f"The most recent data point ({int(_v(f, 'year'))}) shows a {fmt_pct(_v(f, 'change'), True)} move in {METRIC_BY_ID[f['metric']].name.lower()} "
-                                "that falls outside the requested window; it should be monitored as a possible turning point.", "fact_ids": [f["id"]]})
+        if (
+            f["kind"] == "latest"
+            and "change" in f["values"]
+            and f.get("period")
+            and abs(_v(f, "change")) >= 3
+            and f["statement"].startswith("Beyond")
+        ):
+            out.append(
+                {
+                    "text": f"The most recent data point ({int(_v(f, 'year'))}) shows a {fmt_pct(_v(f, 'change'), True)} move in {METRIC_BY_ID[f['metric']].name.lower()} "
+                    "that falls outside the requested window; it should be monitored as a possible turning point.",
+                    "fact_ids": [f["id"]],
+                }
+            )
             break
     prod = _find(facts, "productivity")
     if prod and _v(prod, "gdp_pct") > _v(prod, "emp_pct"):
-        out.append({"text": f"Output growth ({fmt_pct(_v(prod, 'gdp_pct'), True)}) outpaced growth in resident employment ({fmt_pct(_v(prod, 'emp_pct'), True)}) over "
-                            f"{int(_v(prod, 'start_year'))}-{int(_v(prod, 'end_year'))}, pointing to productivity-led rather than headcount-led expansion; "
-                            "non-resident workers are not counted in employment, so the level of output per worker should be read with caution.", "fact_ids": [prod["id"]]})
+        out.append(
+            {
+                "text": f"Output growth ({fmt_pct(_v(prod, 'gdp_pct'), True)}) outpaced growth in resident employment ({fmt_pct(_v(prod, 'emp_pct'), True)}) over "
+                f"{int(_v(prod, 'start_year'))}-{int(_v(prod, 'end_year'))}, pointing to productivity-led rather than headcount-led expansion; "
+                "non-resident workers are not counted in employment, so the level of output per worker should be read with caution.",
+                "fact_ids": [prod["id"]],
+            }
+        )
     cmp_ = _find(facts, "comparison", "employed_residents")
     if cmp_ and "rank" in cmp_["values"] and _v(cmp_, "rank") <= 3:
-        out.append({"text": f"On employment growth the sector ranked #{int(_v(cmp_, 'rank'))} of {int(_v(cmp_, 'of'))} major industries, "
-                            "so its experience should not be read as representative of the wider labour market.", "fact_ids": [cmp_["id"]]})
+        out.append(
+            {
+                "text": f"On employment growth the sector ranked #{int(_v(cmp_, 'rank'))} of {int(_v(cmp_, 'of'))} major industries, "
+                "so its experience should not be read as representative of the wider labour market.",
+                "fact_ids": [cmp_["id"]],
+            }
+        )
     corr = _find(facts, "correlation", "job_vacancies")
     if corr and _v(corr, "p") < 0.05 and _v(corr, "r") < 0:
-        out.append({"text": f"Year-on-year changes in vacancies and retrenchments move in opposite directions (r={_v(corr, 'r'):.2f}, n={int(_v(corr, 'n'))}), "
-                            "consistent with a counter-cyclical labour market; this is an association, not evidence of cause.", "fact_ids": [corr["id"]]})
+        out.append(
+            {
+                "text": f"Year-on-year changes in vacancies and retrenchments move in opposite directions (r={_v(corr, 'r'):.2f}, n={int(_v(corr, 'n'))}), "
+                "consistent with a counter-cyclical labour market; this is an association, not evidence of cause.",
+                "fact_ids": [corr["id"]],
+            }
+        )
     return out[:5]
 
 
@@ -110,15 +170,28 @@ def build_recommendations(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     lead = next((f for f in facts if f["kind"] == "growth"), None)
     if lead:
-        out.append({"text": "Track hiring demand and retrenchments on MOM's quarterly series rather than annual snapshots, so turning points are detected earlier.",
-                    "fact_ids": [lead["id"]]})
+        out.append(
+            {
+                "text": "Track hiring demand and retrenchments on MOM's quarterly series rather than annual snapshots, so turning points are detected earlier.",
+                "fact_ids": [lead["id"]],
+            }
+        )
     pipe = _find(facts, "pipeline")
     if pipe:
-        out.append({"text": "Validate the talent-pipeline indicator with real programme data before using it for planning; the programme figures here are synthetic MOCK data.",
-                    "fact_ids": [pipe["id"]]})
+        out.append(
+            {
+                "text": "Validate the talent-pipeline indicator with real programme data before using it for planning; the programme figures here are synthetic MOCK data.",
+                "fact_ids": [pipe["id"]],
+            }
+        )
     ref = _find(facts, "productivity") or _find(facts, "growth", "total_wage_change") or lead
     if ref:
-        out.append({"text": "Extend the analysis with the foreign-workforce split and inflation-adjusted wages before drawing policy conclusions.", "fact_ids": [ref["id"]]})
+        out.append(
+            {
+                "text": "Extend the analysis with the foreign-workforce split and inflation-adjusted wages before drawing policy conclusions.",
+                "fact_ids": [ref["id"]],
+            }
+        )
     return out
 
 
@@ -143,5 +216,9 @@ def build_summary(facts: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build_narrative(facts: list[dict[str, Any]]) -> dict[str, Any]:
-    return {"findings": build_findings(facts), "implications": build_implications(facts), "recommendations": build_recommendations(facts),
-            "executive_summary": build_summary(facts)}
+    return {
+        "findings": build_findings(facts),
+        "implications": build_implications(facts),
+        "recommendations": build_recommendations(facts),
+        "executive_summary": build_summary(facts),
+    }

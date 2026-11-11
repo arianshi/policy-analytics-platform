@@ -34,7 +34,10 @@ class OfflineProvider(LLMProvider):
             elif req.task == "generate_insights":
                 out = {"findings": template.build_findings(c["facts"]), "implications": template.build_implications(c["facts"])}
             elif req.task == "write_report":
-                out = {"executive_summary": template.build_summary(c["facts"]), "recommendations": template.build_recommendations(c["facts"])}
+                out = {
+                    "executive_summary": template.build_summary(c["facts"]),
+                    "recommendations": template.build_recommendations(c["facts"]),
+                }
             else:
                 raise LLMError(f"offline provider cannot handle task '{req.task}'", provider=self.name)
         except KeyError as exc:

@@ -68,10 +68,15 @@ def normalise_mom(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
         df["sector"] = None
         return _finish(df, "%", notes, [], None)
     if spec.metric == "employed_residents":
-        df = pd.DataFrame({
-            "year": raw["year"], "sector_label": raw["industry2"], "value": raw["employed"],
-            "age": raw["age"], "sex": raw["sex"],
-        })
+        df = pd.DataFrame(
+            {
+                "year": raw["year"],
+                "sector_label": raw["industry2"],
+                "value": raw["employed"],
+                "age": raw["age"],
+                "sex": raw["sex"],
+            }
+        )
         df["sector"] = _map_sectors(df["sector_label"])
         return _finish(df, "persons", notes, ["age", "sex"], "sum")
     label_col = "ind2" if "ind2" in raw.columns else "industry"
@@ -89,8 +94,14 @@ def normalise_singstat(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
             m = re.match(r"\s*(\d{4})", str(col.get("key", "")))
             if not m:
                 continue  # quarterly/monthly periods are out of scope for the annual GDP table
-            rows.append({"year": m.group(1), "sector_label": r["rowText"], "value": col.get("value"),
-                         "unit": r.get("uoM") or "S$ million"})
+            rows.append(
+                {
+                    "year": m.group(1),
+                    "sector_label": r["rowText"],
+                    "value": col.get("value"),
+                    "unit": r.get("uoM") or "S$ million",
+                }
+            )
     if not rows:
         raise SchemaError(f"{spec.key}: no annual periods found in SingStat payload", source=spec.source)
     df = pd.DataFrame(rows)
@@ -102,9 +113,15 @@ def normalise_singstat(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
 
 def normalise_internal(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
     _require(raw, spec.required_columns, spec)
-    df = pd.DataFrame({
-        "year": raw["year"], "sector_label": raw["sector"], "value": raw["completions"], "programme": raw["programme"],
-    })
+    df = pd.DataFrame(
+        {
+            "year": raw["year"],
+            "sector_label": raw["sector"],
+            "value": raw["completions"],
+            "programme": raw["programme"],
+        }
+    )
+
     # Internal systems use free-text sector names; the ontology's alias table resolves them.
     def to_sector(lbl: str) -> str | None:
         hit = sector_for_label(lbl)

@@ -51,16 +51,34 @@ def kinds(ctx):
 
 
 async def test_normal_react_cycle(settings):
-    ctx = make_ctx(settings, providers=[ScriptedProvider("s", llm_says(
-        {"thought": "t1", "action": {"tool": "echo", "args": {"text": "hi"}}}, {"thought": "t2", "final": {"status": "ok"}}))])
+    ctx = make_ctx(
+        settings,
+        providers=[
+            ScriptedProvider(
+                "s",
+                llm_says(
+                    {"thought": "t1", "action": {"tool": "echo", "args": {"text": "hi"}}},
+                    {"thought": "t2", "final": {"status": "ok"}},
+                ),
+            )
+        ],
+    )
     agent = Demo(ctx)
     res = await agent.run()
     assert res.status == "ok" and res.steps == 2 and agent.log == [{"text": "hi"}]
-    assert [k for k in kinds(ctx) if k in ("thought", "action", "observation", "result")] == ["thought", "action", "observation", "thought", "result"]
+    assert [k for k in kinds(ctx) if k in ("thought", "action", "observation", "result")] == [
+        "thought",
+        "action",
+        "observation",
+        "thought",
+        "result",
+    ]
 
 
 async def test_unknown_tool_is_rejected_and_policy_takes_over(settings):
-    ctx = make_ctx(settings, providers=[ScriptedProvider("s", llm_says({"thought": "x", "action": {"tool": "hack", "args": {}}}))])
+    ctx = make_ctx(
+        settings, providers=[ScriptedProvider("s", llm_says({"thought": "x", "action": {"tool": "hack", "args": {}}}))]
+    )
     agent = Demo(ctx)
     res = await agent.run()
     assert res.status == "ok" and agent.log == [{"text": "from-policy"}]
@@ -73,9 +91,20 @@ async def test_malformed_json_falls_back_to_policy(settings):
 
 
 async def test_tool_exceptions_become_observations_not_crashes(settings):
-    ctx = make_ctx(settings, providers=[ScriptedProvider("s", llm_says(
-        {"thought": "a", "action": {"tool": "boom", "args": {}}}, {"thought": "b", "action": {"tool": "bad", "args": {}}},
-        {"thought": "c", "action": {"tool": "echo", "args": {"text": "recovered"}}}, {"thought": "d", "final": {"status": "ok"}}))])
+    ctx = make_ctx(
+        settings,
+        providers=[
+            ScriptedProvider(
+                "s",
+                llm_says(
+                    {"thought": "a", "action": {"tool": "boom", "args": {}}},
+                    {"thought": "b", "action": {"tool": "bad", "args": {}}},
+                    {"thought": "c", "action": {"tool": "echo", "args": {"text": "recovered"}}},
+                    {"thought": "d", "final": {"status": "ok"}},
+                ),
+            )
+        ],
+    )
     agent = Demo(ctx)
     res = await agent.run()
     assert res.status == "ok" and agent.log == [{"text": "recovered"}]
@@ -93,7 +122,9 @@ async def test_looping_agent_is_overridden_by_policy(settings):
 
 
 async def test_premature_final_is_rejected(settings):
-    ctx = make_ctx(settings, providers=[ScriptedProvider("s", lambda r: json.dumps({"thought": "done?", "final": {"status": "ok"}}))])
+    ctx = make_ctx(
+        settings, providers=[ScriptedProvider("s", lambda r: json.dumps({"thought": "done?", "final": {"status": "ok"}}))]
+    )
     agent = Demo(ctx)
     agent.allow_finish = False
     agent.policy = lambda s: finish("policy finish", status="ok")  # type: ignore[method-assign]
@@ -114,7 +145,12 @@ async def test_step_budget_yields_incomplete_not_a_hang(settings):
 
 
 async def test_prompt_contains_goal_tools_state_and_recent_steps(settings):
-    p = ScriptedProvider("s", llm_says({"thought": "t", "action": {"tool": "echo", "args": {"text": "hi"}}}, {"thought": "t", "final": {"status": "ok"}}))
+    p = ScriptedProvider(
+        "s",
+        llm_says(
+            {"thought": "t", "action": {"tool": "echo", "args": {"text": "hi"}}}, {"thought": "t", "final": {"status": "ok"}}
+        ),
+    )
     await Demo(make_ctx(settings, providers=[p])).run()
     second = p.calls[1].prompt
     assert "GOAL: demo" in second and "- echo(text: str)" in second and "STATE:" in second and "observation: " in second

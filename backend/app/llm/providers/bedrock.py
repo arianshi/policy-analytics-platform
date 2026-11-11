@@ -28,7 +28,8 @@ class BedrockProvider(LLMProvider):
     async def complete(self, req: LLMRequest, *, timeout_s: float) -> Completion:
         def call():
             return self._get_client().converse(
-                modelId=self.model, system=[{"text": req.system}],
+                modelId=self.model,
+                system=[{"text": req.system}],
                 messages=[{"role": "user", "content": [{"text": req.prompt}]}],
                 inferenceConfig={"maxTokens": req.max_tokens, "temperature": req.temperature},
             )
@@ -40,7 +41,9 @@ class BedrockProvider(LLMProvider):
         except Exception as exc:  # botocore ClientError etc.
             msg = str(exc)
             transient = any(t in msg for t in ("Throttling", "ServiceUnavailable", "ModelTimeout", "InternalServer"))
-            raise LLMError(f"{self.name}: {exc.__class__.__name__}: {msg[:200]}", transient=transient, provider=self.name) from exc
+            raise LLMError(
+                f"{self.name}: {exc.__class__.__name__}: {msg[:200]}", transient=transient, provider=self.name
+            ) from exc
         try:
             text = "".join(b.get("text", "") for b in data["output"]["message"]["content"])
         except (KeyError, TypeError) as exc:

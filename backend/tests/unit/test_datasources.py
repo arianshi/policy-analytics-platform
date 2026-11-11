@@ -32,7 +32,9 @@ def datagov_transport(settings, hits: dict | None = None, *, not_ready: int = 0,
                 return httpx.Response(status_code)
             if hits[req.url.path] <= not_ready:
                 return httpx.Response(200, json={"code": 0, "data": {"status": "IN_PROGRESS"}})
-            return httpx.Response(200, json={"code": 0, "data": {"status": "DOWNLOAD_SUCCESS", "url": "https://s3.example.test/f.csv"}})
+            return httpx.Response(
+                200, json={"code": 0, "data": {"status": "DOWNLOAD_SUCCESS", "url": "https://s3.example.test/f.csv"}}
+            )
         return httpx.Response(200, content=(settings.snapshot_dir / "mom_job_vacancies.csv").read_bytes())
 
     return httpx.MockTransport(handler)
@@ -147,7 +149,10 @@ async def test_fault_plan_parsing():
     assert not f.llm_fault("gemini") and FaultPlan.parse("llm:*").llm_fault("anything") and not FaultPlan.parse("")
 
 
-@pytest.mark.parametrize("mode,code,retryable", [("rate_limited", "rate_limited", True), ("timeout", "timeout", True), ("unavailable", "unavailable", False)])
+@pytest.mark.parametrize(
+    "mode,code,retryable",
+    [("rate_limited", "rate_limited", True), ("timeout", "timeout", True), ("unavailable", "unavailable", False)],
+)
 async def test_injected_source_faults(settings, mode, code, retryable):
     reg = DataRegistry(settings)
     with pytest.raises(DataSourceError) as e:
@@ -171,7 +176,9 @@ async def test_air_gapped_mode_serves_snapshot_without_degradation(settings):
 async def test_internal_source_and_its_outage(settings):
     reg = DataRegistry(settings)
     raw = await reg.acquire("internal.tech_programmes")
-    assert raw.prov.mode == "internal" and raw.prov.is_mock and {"year", "programme", "sector", "completions"} <= set(raw.df.columns)
+    assert (
+        raw.prov.mode == "internal" and raw.prov.is_mock and {"year", "programme", "sector", "completions"} <= set(raw.df.columns)
+    )
     with pytest.raises(DataSourceError):
         await reg.acquire("internal.tech_programmes", faults=FaultPlan.parse("source:internal"))
     assert not reg.has_snapshot("internal.tech_programmes")

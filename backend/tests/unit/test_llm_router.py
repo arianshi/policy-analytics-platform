@@ -96,7 +96,8 @@ async def test_circuit_opens_skips_provider_then_recovers_after_cooldown():
 def test_breaker_half_open_failure_reopens():
     t = {"now": 0.0}
     b = Breaker(2, 10, clock=lambda: t["now"])
-    b.failure(); b.failure()  # noqa: E702
+    b.failure()
+    b.failure()
     assert b.state == "open"
     t["now"] = 11
     assert b.state == "half-open" and b.allow()
@@ -105,7 +106,12 @@ def test_breaker_half_open_failure_reopens():
 
 
 async def test_all_providers_failing_raises_with_every_reason():
-    router = make_router([ScriptedProvider("a", lambda r: LLMError("x", provider="a")), ScriptedProvider("b", lambda r: LLMError("y", provider="b"))])
+    router = make_router(
+        [
+            ScriptedProvider("a", lambda r: LLMError("x", provider="a")),
+            ScriptedProvider("b", lambda r: LLMError("y", provider="b")),
+        ]
+    )
     with pytest.raises(LLMError) as e:
         await router.complete(req())
     assert "a: x" in str(e.value) and "b: y" in str(e.value)
@@ -129,7 +135,11 @@ async def test_fault_injection_fails_named_provider_only():
 async def test_recorder_receives_successes_and_failures():
     recs = []
     s = Settings(llm_max_retries=0)
-    router = LLMRouter([ScriptedProvider("a", lambda r: LLMError("no", provider="a")), ScriptedProvider("b", lambda r: "ok")], s, recorder=recs.append)
+    router = LLMRouter(
+        [ScriptedProvider("a", lambda r: LLMError("no", provider="a")), ScriptedProvider("b", lambda r: "ok")],
+        s,
+        recorder=recs.append,
+    )
     await router.complete(req(), analysis_id="A1")
     assert [(r["provider"], r["ok"]) for r in recs] == [("a", False), ("b", True)] and recs[0]["analysis_id"] == "A1"
 
@@ -150,5 +160,7 @@ async def test_invalid_output_falls_back_but_does_not_open_the_circuit():
     b = ScriptedProvider("b", lambda r: "fine")
     router = make_router([a, b])
     for _ in range(5):  # well past the breaker threshold of 2
-        assert (await router.complete(req(validator=lambda t: t if t == "fine" else (_ for _ in ()).throw(ValueError("bad"))))).provider == "b"
+        assert (
+            await router.complete(req(validator=lambda t: t if t == "fine" else (_ for _ in ()).throw(ValueError("bad"))))
+        ).provider == "b"
     assert router.status()[0]["circuit"] == "closed" and len(a.calls) == 5
