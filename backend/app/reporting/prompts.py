@@ -31,14 +31,14 @@ def facts_payload(facts: list[dict[str, Any]]) -> str:
 
 
 def insights_prompt(query: str, facts: list[dict[str, Any]], feedback: str = "") -> str:
-    p = f"Question: {query[:300]}\nFACTS:\n{facts_payload(facts)}"
+    p = f"Question: {query[:600]}\nFACTS:\n{facts_payload(facts)}"
     if feedback:
         p += f"\n\nYour previous draft FAILED verification: {feedback}\nRewrite it fixing every problem; use only numbers present in the facts."
     return p
 
 
 def report_prompt(query: str, facts: list[dict[str, Any]], findings: list[dict[str, Any]], feedback: str = "") -> str:
-    p = f"Question: {query[:300]}\nFACTS:\n{facts_payload(facts)}\nFINDINGS:\n{json.dumps(findings, ensure_ascii=False)}"
+    p = f"Question: {query[:600]}\nFACTS:\n{facts_payload(facts)}\nFINDINGS:\n{json.dumps(findings, ensure_ascii=False)}"
     if feedback:
         p += f"\n\nYour previous draft FAILED verification: {feedback}\nRewrite it fixing every problem."
     return p

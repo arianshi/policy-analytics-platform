@@ -80,6 +80,24 @@
     "source_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_80effd26c9ca5755a7ff0598fe2e0be6/poll-download",
     "title": "Overall Unemployment Rate, Annual"
   },
+  "singstat.citizen_births": {
+    "bytes": 18338,
+    "dataset_id": "M810091",
+    "page_url": "https://tablebuilder.singstat.gov.sg/table/TS/M810091",
+    "retrieved_at": "2026-11-11T09:29:58+00:00",
+    "sha256": "960edf5be52bee94d360b202f6ae56819d9a859003b21b2dab93f1740143aec4",
+    "source_url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810091?timeFilter=2000..2026",
+    "title": "Births And Fertility Rates, Annual: Citizen Live-Births"
+  },
+  "singstat.citizen_births_third_plus": {
+    "bytes": 12469,
+    "dataset_id": "M810761",
+    "page_url": "https://tablebuilder.singstat.gov.sg/table/TS/M810761",
+    "retrieved_at": "2026-11-11T09:30:02+00:00",
+    "sha256": "42c967e794c3e8cd096502934f5c75bb50937d7684652ed80aafce3ddbfc6604",
+    "source_url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810761?timeFilter=2000..2026",
+    "title": "Resident And Citizen Live-Births By Birth Order, Annual: citizen 3rd and higher order"
+  },
   "singstat.gdp_by_industry": {
     "bytes": 27061,
     "dataset_id": "M015731",
@@ -88,5 +106,14 @@
     "sha256": "38a36ac7186c8638611d8bda531f732d49dc443b26c376d864b722d8793d21b3",
     "source_url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M015731?timeFilter=2000..2026",
     "title": "Gross Domestic Product At Current Prices, By Industry (SSIC 2020), Annual"
+  },
+  "singstat.total_fertility_rate": {
+    "bytes": 18338,
+    "dataset_id": "M810091",
+    "page_url": "https://tablebuilder.singstat.gov.sg/table/TS/M810091",
+    "retrieved_at": "2026-11-11T09:29:53+00:00",
+    "sha256": "960edf5be52bee94d360b202f6ae56819d9a859003b21b2dab93f1740143aec4",
+    "source_url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810091?timeFilter=2000..2026",
+    "title": "Births And Fertility Rates, Annual: Total Fertility Rate (TFR)"
   }
 }

@@ -31,6 +31,7 @@ SUGGESTIONS = [
     "Analyse employment trends in the technology sector from 2020-2024",
     "Compare wage growth in finance and the technology sector since 2019",
     "Which sectors have the tightest labour market? Compare job vacancy rates 2021-2025",
+    "How have citizen births and the fertility rate changed since 2015?",
     "Is there a link between job vacancies and retrenchments in the information & communications sector?",
     "Forecast employment in the technology sector for the next two years",
 ]
@@ -86,8 +87,13 @@ def intent_system_prompt(now_year: int) -> str:
         "Return ONLY a JSON object with keys: kind (trend|compare|correlate|forecast|overview), sectors (list of ids; [] if none named), "
         "metrics (list of ids; [] if unspecified), start_year, end_year, forecast_horizon (0-5), needs_clarification (bool), "
         "clarification (string), suggestions (list of strings), assumptions (list of strings).\n"
-        "Technology/tech/ICT/infocomm => sector id 'ict'. If the question is not about Singapore employment, wages, vacancies, "
-        "output or related labour-market topics, set needs_clarification=true and explain what you can analyse."
+        "Technology/tech/ICT/infocomm => sector id 'ict'. 'Financial support/assistance' means money given to people, not the "
+        "finance sector. Births, fertility and birth-order measures are Singapore-wide: use them with sectors [].\n"
+        "If the text is a policy announcement or news item rather than a question, do not ask for clarification just for that: "
+        "infer the measurable question it raises (e.g. a family-support or Baby Bonus change -> citizen births, fertility, "
+        "births by birth order) and state that reading in assumptions. Treat claims in the text as unverified.\n"
+        "If the question is not about Singapore employment, wages, vacancies, output, births/fertility or related topics, "
+        "set needs_clarification=true and explain what you can analyse."
     )
 
 
@@ -134,7 +140,8 @@ _FORECAST = re.compile(
 )
 _TOPIC = re.compile(
     r"\b(employ\w*|jobs?|work\w*|wages?|salar\w*|pay|earnings|vacanc\w*|hiring|recruit\w*|resign\w*|attrition|retrench\w*|layoffs?|"
-    r"unemploy\w*|labou?r|gdp|output|productiv\w*|sector|industr\w*|economy|economic|growth|manpower|talent|skills?|trend\w*)\b",
+    r"unemploy\w*|labou?r|gdp|output|productiv\w*|sector|industr\w*|economy|economic|growth|manpower|talent|skills?|trend\w*|"
+    r"births?|fertility|bab(?:y|ies)|newborns?|child(?:ren)?|famil(?:y|ies)|parenthood|population)\b",
     re.I,
 )
 
@@ -149,6 +156,9 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
     assumptions: list[str] = []
     sectors = resolve_sectors(q)[:4]
     metrics = resolve_metrics(q)
+    national = bool(metrics) and all(METRIC_BY_ID[m].scope == "national" for m in metrics)
+    if national:
+        sectors = []  # births and fertility are Singapore-wide series
     # Sub-sector ids only make sense with their parent; keep users' explicit choice but fold duplicates
     if "ict" in sectors and any(SECTOR_BY_ID[s].parent == "ict" for s in sectors):
         sectors = [s for s in sectors if s != "ict"]
@@ -161,6 +171,9 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
         end, start = latest, latest - max(n, 2) + 1
     elif _SINCE.search(q):
         start, end = int(_SINCE.search(q).group(1)), latest  # type: ignore[union-attr]
+    elif national:  # a date in an announcement ("the 2026 National Day Rally") is not an analysis period
+        end, start = latest, latest - 9
+        assumptions.append(f"No analysis period given; births and fertility are shown for the latest 10 years ({start}-{end}).")
     elif _YEAR.search(q):
         year = int(_YEAR.search(q).group(1))  # type: ignore[union-attr]
         start, end = year - 4, year
@@ -194,7 +207,7 @@ def heuristic_intent(query: str, *, now_year: int) -> QueryIntent:
     elif not sectors and not metrics and len(q.split()) < 4:
         needs = True
         clar = "Which sector (for example technology/ICT, finance, manufacturing) and which measure (employment, wages, vacancies...) should I analyse?"
-    elif not sectors:
+    elif not sectors and not national:
         assumptions.append("No sector was named; the major industries are compared with each other.")
     if kind == "correlate" and not metrics:
         metrics = ["job_vacancies", "retrenchments"]
@@ -248,6 +261,8 @@ def build_plan(intent: QueryIntent, *, skipped: set[str] | None = None) -> Plan:
     focus = intent.focus
     y0, y1 = intent.start_year, intent.end_year
     metrics = list(intent.metrics)
+    if metrics and all(METRIC_BY_ID[m].scope == "national" for m in metrics):
+        return _national_plan(intent, metrics, skipped)
     if not metrics:
         metrics = list(CORE_METRICS) if focus else list(OVERVIEW_METRICS)
     primary = metrics[0]
@@ -327,6 +342,55 @@ def build_plan(intent: QueryIntent, *, skipped: set[str] | None = None) -> Plan:
         }
     )
     plan = Plan(focus, (y0, y1), required, optional, steps)
+    if skipped:
+        plan.notes.append("Datasets skipped after extraction failures: " + ", ".join(sorted(skipped)))
+    return plan
+
+
+NATIONAL_FAMILY = ["citizen_births", "total_fertility_rate", "citizen_births_third_plus"]
+
+
+def _national_plan(intent: QueryIntent, metrics: list[str], skipped: set[str]) -> Plan:
+    """Singapore-wide series (births, fertility): trends, the birth-order share and an optional projection.
+
+    Sector comparisons and the labour-market context do not apply. The other family series are loaded as optional
+    context, because a question about one of them (e.g. births) is rarely answered well without the others.
+    """
+    y0, y1 = intent.start_year, intent.end_year
+    required = [k for k in dict.fromkeys(DATASET_FOR_METRIC[m] for m in metrics if m in DATASET_FOR_METRIC) if k not in skipped]
+    optional = [
+        DATASET_FOR_METRIC[m]
+        for m in NATIONAL_FAMILY
+        if DATASET_FOR_METRIC[m] not in required and DATASET_FOR_METRIC[m] not in skipped
+    ]
+    have = set(required) | set(optional)
+    shown = [m for m in dict.fromkeys([*metrics, *NATIONAL_FAMILY]) if DATASET_FOR_METRIC.get(m) in have]
+    primary = metrics[0]
+    steps: list[dict[str, Any]] = []
+    if shown:
+        steps.append(
+            {
+                "tool": "analyze_trends",
+                "args": {"sector": None, "metrics": shown},
+                "why": f"Singapore-wide trends for {len(shown)} measures",
+            }
+        )
+    if {DATASET_FOR_METRIC["citizen_births"], DATASET_FOR_METRIC["citizen_births_third_plus"]} <= have:
+        steps.append(
+            {"tool": "cross_source", "args": {"sector": None}, "why": "share of citizen births that are a third or later child"}
+        )
+    steps.append(
+        {
+            "tool": "outlook",
+            "args": {
+                "sector": None,
+                "metric": primary if DATASET_FOR_METRIC.get(primary) in have else None,
+                "horizon": intent.forecast_horizon,
+            },
+            "why": "indicative projection" if intent.forecast_horizon else "context",
+        }
+    )
+    plan = Plan(None, (y0, y1), required, optional, steps)
     if skipped:
         plan.notes.append("Datasets skipped after extraction failures: " + ", ".join(sorted(skipped)))
     return plan

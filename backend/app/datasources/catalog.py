@@ -12,6 +12,7 @@ from .base import DatasetSpec
 
 _DG = "https://data.gov.sg/datasets/{}/view"
 _MOM = "Ministry of Manpower (via Data.gov.sg)"
+_SINGSTAT = "Singapore Department of Statistics (SingStat Table Builder)"
 _MOM_IND_COLS = ("year", "industry")
 
 
@@ -141,6 +142,54 @@ CATALOG: tuple[DatasetSpec, ...] = (
         required_columns=("rowText", "columns"),
         snapshot_file="singstat_M015731.json",
         licence="SingStat Open Data Licence",
+    ),
+    DatasetSpec(
+        key="singstat.total_fertility_rate",
+        source="singstat",
+        source_name=_SINGSTAT,
+        title="Births And Fertility Rates, Annual: Total Fertility Rate (TFR)",
+        description="Resident total fertility rate (births per female), annual, Singapore-wide.",
+        metric="total_fertility_rate",
+        fmt="json",
+        dataset_id="M810091",
+        page_url="https://tablebuilder.singstat.gov.sg/table/TS/M810091",
+        keywords=("fertility", "tfr", "birth rate", "births", "babies", "population", "family", "families", "baby bonus"),
+        required_columns=("seriesNo", "rowText", "columns"),
+        snapshot_file="singstat_M810091.json",
+        licence="SingStat Open Data Licence",
+        series_nos=("1",),
+    ),
+    DatasetSpec(
+        key="singstat.citizen_births",
+        source="singstat",
+        source_name=_SINGSTAT,
+        title="Births And Fertility Rates, Annual: Citizen Live-Births",
+        description="Number of live-births to Singapore citizens, annual, Singapore-wide.",
+        metric="citizen_births",
+        fmt="json",
+        dataset_id="M810091",
+        page_url="https://tablebuilder.singstat.gov.sg/table/TS/M810091",
+        keywords=("births", "live-births", "babies", "newborns", "citizen children", "population", "family", "baby bonus"),
+        required_columns=("seriesNo", "rowText", "columns"),
+        snapshot_file="singstat_M810091.json",
+        licence="SingStat Open Data Licence",
+        series_nos=("7",),
+    ),
+    DatasetSpec(
+        key="singstat.citizen_births_third_plus",
+        source="singstat",
+        source_name=_SINGSTAT,
+        title="Resident And Citizen Live-Births By Birth Order, Annual: citizen 3rd and higher order",
+        description="Citizen live-births of a third or later child (3rd + 4th + 5th-and-higher order), annual.",
+        metric="citizen_births_third_plus",
+        fmt="json",
+        dataset_id="M810761",
+        page_url="https://tablebuilder.singstat.gov.sg/table/TS/M810761",
+        keywords=("birth order", "third child", "large families", "larger families", "births", "family", "baby bonus"),
+        required_columns=("seriesNo", "rowText", "columns"),
+        snapshot_file="singstat_M810761.json",
+        licence="SingStat Open Data Licence",
+        series_nos=("2.3", "2.4", "2.5"),
     ),
     DatasetSpec(
         key="internal.tech_programmes",

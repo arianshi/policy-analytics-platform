@@ -245,3 +245,49 @@ async def test_charts_are_well_formed(run_analysis_offline):
 async def test_every_report_passes_its_own_hallucination_check(run_analysis_offline, q):
     _, r = await run_analysis_offline(q)
     assert r["verification"]["passed"] and r["verification"]["grounding_score"] == 1.0 and r["verification"]["error_count"] == 0
+
+
+async def test_policy_announcement_gets_a_verified_births_and_fertility_report(run_analysis_offline):
+    from tests.unit.test_family_data import ANNOUNCEMENT
+
+    ctx, r = await run_analysis_offline(ANNOUNCEMENT)
+    assert r["status"] == "completed" and r["verification"]["passed"]
+    assert {f["metric"] for f in r["facts"]} >= {"total_fertility_rate", "citizen_births", "citizen_births_third_plus"}
+    share = next(f for f in r["facts"] if f["kind"] == "share")
+    assert round(share["values"]["share_end"]["v"], 1) == 18.4  # 4,808 of 26,071 citizen births in 2025
+    assert r["report"]["recommendations"] and "hiring" not in json.dumps(r["report"]["recommendations"])
+    # the agents see the whole question, not a 200-character cut
+    goals = [e[2] for e in ctx.events if e[1] == "status" and "Analysis started" in e[2]]
+    assert goals and len(ANNOUNCEMENT) > 200
+
+
+def test_coordinator_goal_carries_the_full_question(settings):
+    from app.agents.coordinator import CoordinatorAgent
+    from tests.unit.test_family_data import ANNOUNCEMENT
+
+    assert ANNOUNCEMENT[-40:] in CoordinatorAgent(make_ctx(settings, query=ANNOUNCEMENT)).goal()
+
+
+async def test_a_question_asked_mid_run_never_mislabels_a_finished_report(settings):
+    """Live Claude asked for clarification although the intent was resolved, then produced the full report anyway."""
+    from app.llm.providers.offline import OfflineProvider
+    from tests.unit.test_family_data import ANNOUNCEMENT
+
+    asked = {"n": 0}
+
+    def model(req):
+        if "coordinator agent" in req.system and '"intent": {' in req.prompt and '"plan": null' in req.prompt and not asked["n"]:
+            asked["n"] += 1
+            return json.dumps(
+                {
+                    "thought": "Not phrased as a question.",
+                    "action": {"tool": "request_clarification", "args": {"question": "What should I analyse?"}},
+                }
+            )
+        return "not json"  # everything else: the offline model
+
+    ctx = make_ctx(settings, query=ANNOUNCEMENT, providers=[ScriptedProvider("asker", model), OfflineProvider()])
+    r = await run_analysis(ctx)
+    assert asked["n"] == 1
+    assert r["status"] == "completed" and r["clarification"] is None and r["report"]
+    assert r["report"]["title"] == "Singapore: births & fertility, 2016-2025"

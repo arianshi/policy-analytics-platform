@@ -14,8 +14,11 @@ async def run_analysis(ctx: RunContext) -> dict[str, Any]:
     ctx.emit("coordinator", "status", "Analysis started", {"query": ctx.query, "faults": ctx.faults.describe()})
     res = await CoordinatorAgent(ctx).run()
     status = res.final.get("status", res.status)
-    if ctx.clarification:
+    if ctx.clarification and not ctx.report:
         status = "needs_clarification"
+    elif ctx.clarification:  # a verified report exists: deliver it, and keep the agent's question as a note
+        ctx.warnings.append(f"The coordinator also raised a question: {ctx.clarification['question']}")
+        ctx.clarification = None
     elif not ctx.report:
         status = "failed"
     elif status not in ("completed", "degraded"):

@@ -28,6 +28,12 @@ def metric_label(metric: str) -> str:
     return m.name.lower() if m else metric
 
 
+def scope_name(sector: str | None, metric: str) -> str:
+    """'Singapore' for national series (births, fertility), otherwise the sector name."""
+    m = METRIC_BY_ID.get(metric)
+    return "Singapore" if sector is None and m is not None and m.scope == "national" else sector_name(sector)
+
+
 def metric_unit(metric: str) -> str:
     m = METRIC_BY_ID.get(metric) or DERIVED_METRICS.get(metric)
     return m.unit if m else ""
@@ -86,7 +92,7 @@ class AnalysisEngine:
 
     # ------------------------------------------------------------------ analyses
     def trend(self, sector: str | None, metric: str, y0: int, y1: int, *, primary: bool = False) -> dict:
-        sname, unit, label = sector_name(sector), metric_unit(metric), metric_label(metric)
+        sname, unit, label = scope_name(sector, metric), metric_unit(metric), metric_label(metric)
         src = self.sources(metric)
         s = self.series(metric, sector, y0, y1)
         if len(s) < 3:
@@ -578,8 +584,8 @@ class AnalysisEngine:
         )
         return {"status": "ok", "fact_ids": [f.id], "headline": f.statement}
 
-    def forecast(self, sector: str, metric: str, horizon: int) -> dict:
-        sname, label, unit, src = sector_name(sector), metric_label(metric), metric_unit(metric), self.sources(metric)
+    def forecast(self, sector: str | None, metric: str, horizon: int) -> dict:
+        sname, label, unit, src = scope_name(sector, metric), metric_label(metric), metric_unit(metric), self.sources(metric)
         s = self.series(metric, sector)
         if stats.breaks_trend(s.index.to_numpy(), s.to_numpy()):
             ly = int(s.index[-1])
@@ -653,6 +659,38 @@ class AnalysisEngine:
                 "sources": src,
                 "note": "Indicative linear projection - scenario, not prediction.",
             }
+        )
+        return {"status": "ok", "fact_ids": [f.id], "headline": f.statement}
+
+    def birth_order_share(self, y0: int, y1: int) -> dict:
+        """Share of citizen births that are a third or later child: the group the Large Families Scheme targeted."""
+        third = self.series("citizen_births_third_plus", None, y0, y1)
+        total = self.series("citizen_births", None, y0, y1)
+        years = sorted(set(third.index) & set(total.index))
+        src = self.sources("citizen_births_third_plus", "citizen_births")
+        if len(years) < 2:
+            return {"status": "insufficient_data"}
+        ya, yb = years[0], years[-1]
+        sa, sb = third[ya] / total[ya] * 100.0, third[yb] / total[yb] * 100.0
+        f = self.facts.add(
+            "share",
+            f"Singapore: citizen births of a third or later child were {fmt_count(third[yb])} of {fmt_count(total[yb])} citizen "
+            f"births in {yb} ({fmt_pct(sb)}), compared with {fmt_count(third[ya])} of {fmt_count(total[ya])} ({fmt_pct(sa)}) in {ya}.",
+            metric="citizen_births_third_plus",
+            period=(ya, yb),
+            values={
+                "start_year": FactValue(ya, YEAR),
+                "end_year": FactValue(yb, YEAR),
+                "third_start": FactValue(float(third[ya]), COUNT),
+                "total_start": FactValue(float(total[ya]), COUNT),
+                "third_end": FactValue(float(third[yb]), COUNT),
+                "total_end": FactValue(float(total[yb]), COUNT),
+                "share_start": FactValue(sa, PCT),
+                "share_end": FactValue(sb, PCT),
+            },
+            sources=src,
+            caveats=["Birth-order counts may not add up to the total because birth order is sometimes not reported."],
+            importance=0.8,
         )
         return {"status": "ok", "fact_ids": [f.id], "headline": f.statement}
 

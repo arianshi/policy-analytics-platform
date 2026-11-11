@@ -153,9 +153,16 @@ def sector_name(sector_id: str | None) -> str:
     return s.name if s else sector_id
 
 
+# Phrases that use an industry word in its everyday sense: "financial support" is money given to families,
+# not the finance sector.
+_NOT_A_SECTOR = re.compile(
+    r"\bfinancial (support|assistance|aid|help|benefits?|incentives?|security|burden|needs?|difficult\w*)\b"
+)
+
+
 def resolve_sectors(text: str) -> list[str]:
     """Find sectors mentioned in free text (alias match on word boundaries, longest alias first)."""
-    t = " " + norm_label(text) + " "
+    t = " " + _NOT_A_SECTOR.sub(" ", norm_label(text)) + " "
     found: list[tuple[int, str]] = []
     pairs = sorted(
         ((norm_label(a), s.id) for s in SECTORS for a in (*s.aliases, s.name, *s.labels)),
@@ -186,6 +193,7 @@ class Metric:
     description: str
     keywords: tuple[str, ...] = field(default_factory=tuple)
     higher_is: str = "neutral"  # "good" | "bad" | "neutral" - used for wording only
+    scope: str = "industry"  # "industry": one series per sector; "national": one Singapore-wide series
 
 
 METRICS: tuple[Metric, ...] = (
@@ -270,6 +278,64 @@ METRICS: tuple[Metric, ...] = (
         "Annual overall unemployment rate (economy-wide, not by industry).",
         ("unemployment", "unemployed", "jobless"),
         higher_is="bad",
+    ),
+    Metric(
+        "total_fertility_rate",
+        "Total fertility rate",
+        "per female",
+        "level",
+        "Resident total fertility rate: average live-births per female over her reproductive years (SingStat).",
+        (
+            "fertility",
+            "fertility rate",
+            "total fertility rate",
+            "tfr",
+            "birth rate",
+            "baby bonus",
+            "child support package",
+            "large families scheme",
+            "marriage and parenthood",
+        ),
+        scope="national",
+    ),
+    Metric(
+        "citizen_births",
+        "Citizen live-births",
+        "births",
+        "level",
+        "Number of live-births to Singapore citizens in the year (SingStat).",
+        (
+            "births",
+            "birth",
+            "live births",
+            "live-births",
+            "babies",
+            "baby",
+            "newborns",
+            "citizen child",
+            "citizen children",
+            "baby bonus",
+            "child support package",
+        ),
+        scope="national",
+    ),
+    Metric(
+        "citizen_births_third_plus",
+        "Citizen births of a third or later child",
+        "births",
+        "level",
+        "Citizen live-births of birth order 3 and higher: 3rd, 4th and 5th-and-higher order (SingStat).",
+        (
+            "birth order",
+            "third child",
+            "3rd child",
+            "third and subsequent",
+            "larger families",
+            "large families",
+            "large families scheme",
+            "regardless of birth order",
+        ),
+        scope="national",
     ),
     Metric(
         "programme_completions",

@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from ..ontology import norm_label, resolve_sectors, sector_for_label
+from ..ontology import METRIC_BY_ID, norm_label, resolve_sectors, sector_for_label
 from .base import DatasetSpec, SchemaError
 
 CANONICAL = ["year", "sector", "sector_label", "value", "unit"]
@@ -86,8 +86,35 @@ def normalise_mom(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
     return _finish(df, unit, notes, [], None)
 
 
+def _singstat_national(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
+    """Selected national series (seriesNo) of a table such as M810091 births and fertility; summed when several."""
+    rows: list[dict] = []
+    for _, r in raw.iterrows():
+        if str(r["seriesNo"]) not in spec.series_nos:
+            continue
+        for col in r["columns"]:
+            m = re.match(r"\s*(\d{4})", str(col.get("key", "")))
+            if m:
+                rows.append({"year": m.group(1), "sector_label": "Overall", "value": col.get("value"), "series": r["rowText"]})
+    found = {row["series"] for row in rows}
+    if not rows or len(found) < len(spec.series_nos):
+        raise SchemaError(
+            f"{spec.key}: SingStat table {spec.dataset_id} no longer has series {list(spec.series_nos)} "
+            f"(found {len(found)}) - the table layout may have changed",
+            source=spec.source,
+        )
+    df = pd.DataFrame(rows)
+    df["sector"] = None
+    unit = METRIC_BY_ID[spec.metric].unit
+    if len(spec.series_nos) > 1:
+        return _finish(df, unit, [], ["series"], "sum")
+    return _finish(df.drop(columns=["series"]), unit, [], [], None)
+
+
 def normalise_singstat(spec: DatasetSpec, raw: pd.DataFrame) -> Normalised:
     _require(raw, spec.required_columns, spec)
+    if spec.series_nos:
+        return _singstat_national(spec, raw)
     rows: list[dict] = []
     for _, r in raw.iterrows():
         for col in r["columns"]:

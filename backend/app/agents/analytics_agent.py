@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-from ..analytics.engine import AnalysisEngine
+from ..analytics.engine import AnalysisEngine, scope_name
 from ..ontology import METRIC_BY_ID, SECTOR_BY_ID, sector_name
 from .base import ReActAgent, ToolError
 from .context import RunContext
@@ -31,8 +31,8 @@ class AnalyticsAgent(ReActAgent):
         self.add_tool("check_scope", "Report what each loaded dataset covers (sectors, years)", "", self._scope)
         self.add_tool(
             "analyze_trends",
-            "Growth, peak/trough, linear trend and latest change for a sector",
-            "sector: str, metrics: list[str]",
+            "Growth, peak/trough, linear trend and latest change for a sector (sector=null: Singapore-wide births/fertility)",
+            "sector: str|null, metrics: list[str]",
             self._trends,
         )
         self.add_tool(
@@ -49,8 +49,8 @@ class AnalyticsAgent(ReActAgent):
         )
         self.add_tool(
             "cross_source",
-            "Join sources: value added per worker (SingStat x MOM) and talent pipeline (internal x MOM)",
-            "sector: str",
+            "Join sources: value added per worker (SingStat x MOM), talent pipeline (internal x MOM); sector=null: share of births by birth order",
+            "sector: str|null",
             self._cross,
         )
         self.add_tool(
@@ -63,7 +63,7 @@ class AnalyticsAgent(ReActAgent):
     # ------------------------------------------------------------------ state
     def goal(self) -> str:
         i = self.ctx.intent
-        return f"Run the planned analyses for '{self.ctx.query[:120]}' over {i.start_year}-{i.end_year}."  # type: ignore[union-attr]
+        return f"Run the planned analyses for '{self.ctx.query[:600]}' over {i.start_year}-{i.end_year}."  # type: ignore[union-attr]
 
     def _todo(self) -> list[dict[str, Any]]:
         seen: Counter[str] = Counter()
@@ -141,14 +141,15 @@ class AnalyticsAgent(ReActAgent):
         }
 
     async def _trends(self, args: dict[str, Any]) -> dict[str, Any]:
-        sector, metrics = self._sector(args), self._metrics(args)
+        # sector=None selects the national series (births, fertility)
+        sector, metrics = self._sector(args, required=False), self._metrics(args)
         y0, y1 = self._win
         primary = primary_metric(self.ctx.intent)  # type: ignore[arg-type]
         results = []
         for m in metrics:
             if not self.engine.has(m, sector):
                 self.engine._limit(
-                    f"{sector_name(sector)}: no {METRIC_BY_ID[m].name.lower()} data is available for this sector in the loaded sources.",
+                    f"{scope_name(sector, m)}: no {METRIC_BY_ID[m].name.lower()} data is available for this scope in the loaded sources.",
                     sector,
                     m,
                     self.engine.sources(m),
@@ -156,7 +157,11 @@ class AnalyticsAgent(ReActAgent):
                 results.append({"status": "no_data"})
                 continue
             results.append(self.engine.trend(sector, m, y0, y1, primary=(m == primary and sector == self.ctx.plan.focus)))  # type: ignore[union-attr]
-        return self._done("analyze_trends", results, f"Trend analysis of {len(metrics)} measure(s) for {sector_name(sector)}")
+        return self._done(
+            "analyze_trends",
+            results,
+            f"Trend analysis of {len(metrics)} measure(s) for {scope_name(sector, metrics[0] if metrics else '')}",
+        )
 
     async def _compare(self, args: dict[str, Any]) -> dict[str, Any]:
         metrics = self._metrics(args)
@@ -184,9 +189,13 @@ class AnalyticsAgent(ReActAgent):
         return self._done("analyze_relationships", results, f"Relationship and anomaly analysis for {sector_name(sector)}")
 
     async def _cross(self, args: dict[str, Any]) -> dict[str, Any]:
-        sector = self._sector(args)
+        sector = self._sector(args, required=False)
         y0, y1 = self._win
         results = []
+        if sector is None:  # national: join births by birth order with all citizen births
+            if "citizen_births_third_plus" in self.engine.coverage() and "citizen_births" in self.engine.coverage():
+                results.append(self.engine.birth_order_share(y0, y1))
+            return self._done("cross_source", results, "Cross-source analysis: births by birth order")
         if "gdp" in self.engine.coverage() and "employed_residents" in self.engine.coverage():
             results.append(self.engine.productivity(sector, y0, y1))
         if "programme_completions" in self.engine.coverage():
@@ -198,6 +207,7 @@ class AnalyticsAgent(ReActAgent):
         results = [self.engine.economy_context(y0, y1)]
         horizon = int(args.get("horizon") or 0)
         sector, metric = args.get("sector"), args.get("metric")
-        if horizon > 0 and sector in SECTOR_BY_ID and metric in METRIC_BY_ID and self.engine.has(metric, sector):
+        national = sector is None and metric in METRIC_BY_ID and METRIC_BY_ID[metric].scope == "national"
+        if horizon > 0 and (sector in SECTOR_BY_ID or national) and metric in METRIC_BY_ID and self.engine.has(metric, sector):
             results.append(self.engine.forecast(sector, metric, min(horizon, 5)))
         return self._done("outlook", results, "Context and outlook")

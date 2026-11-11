@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from ..data_quality import DQReport, ProcessedDataset
-from ..ontology import sector_name
+from ..ontology import METRIC_BY_ID, sector_name
 
 METHODOLOGY = [
     "Data are retrieved by source adapters (Data.gov.sg CSV, SingStat JSON API, internal Excel extract), normalised to a common sector ontology and cleaned; every cleaning action is logged in the data-quality report.",
@@ -86,6 +86,10 @@ def build_limitations(facts: list[dict[str, Any]], dq: dict[str, DQReport], proc
 
 
 def _title(intent: dict[str, Any]) -> str:
+    metrics = intent.get("metrics") or []
+    if metrics and all(m in METRIC_BY_ID and METRIC_BY_ID[m].scope == "national" for m in metrics):
+        what = "births & fertility outlook" if intent["kind"] == "forecast" else "births & fertility"
+        return f"Singapore: {what}, {intent['start_year']}-{intent['end_year']}"
     sectors = [sector_name(s) for s in intent.get("sectors", [])]
     subject = " vs ".join(sectors) if sectors else "Major industries"
     kind = {

@@ -45,6 +45,9 @@ class DatasetSpec:
     snapshot_file: str = ""
     is_mock: bool = False
     licence: str = "Singapore Open Data Licence v1.0"
+    # SingStat tables with several national series (not by industry): the seriesNo values to keep.
+    # More than one is summed after cleaning (e.g. 3rd + 4th + 5th-and-higher order births).
+    series_nos: tuple[str, ...] = ()
 
 
 @dataclass

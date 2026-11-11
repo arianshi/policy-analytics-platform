@@ -120,10 +120,12 @@ def fmt_by_unit(v: float, unit: str) -> str:
         return fmt_money_m(v)
     if unit == "S$ thousand":
         return f"S${v:,.1f} thousand"
-    if unit == "ratio":
+    if unit in ("ratio", "per female"):
         return fmt_ratio(v)
     return fmt_count(v)
 
 
 def kind_for_unit(unit: str) -> str:
-    return PCT if unit == "%" else MONEY_M if unit.startswith("S$ million") else RATIO if unit == "ratio" else COUNT
+    return (
+        PCT if unit == "%" else MONEY_M if unit.startswith("S$ million") else RATIO if unit in ("ratio", "per female") else COUNT
+    )

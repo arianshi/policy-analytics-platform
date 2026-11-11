@@ -14,6 +14,7 @@ from ..ontology import METRIC_BY_ID, sector_name
 
 # (theme, metrics in priority order): the first metric is the theme's headline measure
 THEMES: list[tuple[str, tuple[str, ...]]] = [
+    ("Births and fertility", ("total_fertility_rate", "citizen_births", "citizen_births_third_plus")),
     ("Employment", ("employed_residents",)),
     ("Hiring demand", ("job_vacancies", "job_vacancy_rate", "recruitment_rate")),
     ("Churn and layoffs", ("retrenchments", "resignation_rate")),
@@ -154,6 +155,26 @@ def build_implications(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "fact_ids": [cmp_["id"]],
             }
         )
+    order = _find(facts, "share", "citizen_births_third_plus")
+    if order:
+        out.append(
+            {
+                "text": f"Third-or-later children made up {fmt_pct(_v(order, 'share_end'))} of citizen births in {int(_v(order, 'end_year'))}. "
+                "Support that varies by birth order (such as the Large Families Scheme) reaches this group, so any change that "
+                "equalises support across birth order matters most for these families and should be tracked for them separately.",
+                "fact_ids": [order["id"]],
+            }
+        )
+    tfr = _find(facts, "growth", "total_fertility_rate")
+    if tfr and "pct_change" in tfr["values"] and _v(tfr, "pct_change") < 0:
+        out.append(
+            {
+                "text": f"The total fertility rate changed by {fmt_pct(_v(tfr, 'pct_change'), True)} over {int(_v(tfr, 'start_year'))}-{int(_v(tfr, 'end_year'))}, "
+                "so family-support measures are operating against a falling trend; a change in births after a new scheme should be "
+                "compared with that trend rather than read as its effect.",
+                "fact_ids": [tfr["id"]],
+            }
+        )
     corr = _find(facts, "correlation", "job_vacancies")
     if corr and _v(corr, "p") < 0.05 and _v(corr, "r") < 0:
         out.append(
@@ -169,6 +190,22 @@ def build_implications(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def build_recommendations(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     lead = next((f for f in facts if f["kind"] == "growth"), None)
+    if lead and lead.get("metric") in METRIC_BY_ID and METRIC_BY_ID[lead["metric"]].scope == "national":
+        out.append(
+            {
+                "text": "Track births by birth order on SingStat's quarterly live-births series as well as the annual figures, so a change "
+                "after any revision to family-support schemes shows up early.",
+                "fact_ids": [lead["id"]],
+            }
+        )
+        out.append(
+            {
+                "text": "Before attributing a change in births to a scheme, add marriage and age-specific fertility data: the trend "
+                "statistics here describe what happened, not why.",
+                "fact_ids": [lead["id"]],
+            }
+        )
+        return out
     if lead:
         out.append(
             {

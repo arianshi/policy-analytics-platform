@@ -44,7 +44,7 @@ class CoordinatorAgent(ReActAgent):
         self.add_tool("delegate_reporting", "Run the Reporter agent", "", self._delegate_reporting)
 
     def goal(self) -> str:
-        return f"Answer the policy question: {self.ctx.query[:200]!r}"
+        return f"Answer the policy question: {self.ctx.query[:600]!r}"  # the full question (max 600 characters)
 
     def state(self) -> dict[str, Any]:
         i, p = self.ctx.intent, self.ctx.plan
@@ -91,6 +91,12 @@ class CoordinatorAgent(ReActAgent):
 
     async def _clarify(self, args: dict[str, Any]) -> dict[str, Any]:
         i = self.ctx.intent
+        if i is not None and not i.needs_clarification and (i.metrics or i.sectors):
+            # Asking and then carrying on anyway left finished reports labelled "needs clarification".
+            raise ToolError(
+                "the interpretation already resolved this question (needs_clarification=false); continue with plan_workflow "
+                "and record any doubt as an assumption in the report instead of asking"
+            )
         q = str(args.get("question") or (i.clarification if i else "Could you clarify your question?"))
         self.ctx.clarification = {"question": q, "suggestions": (i.suggestions if i else [])}
         self.clarified = True
