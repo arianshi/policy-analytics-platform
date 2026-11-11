@@ -2,11 +2,14 @@
 
 import json
 
+import anthropic
 import httpx
+import httpx2
 import pytest
 
 from app.config import Settings
 from app.llm.factory import build_providers
+from app.llm.providers.anthropic import AnthropicProvider
 from app.llm.providers.azure import AzureOpenAIProvider
 from app.llm.providers.bedrock import BedrockProvider
 from app.llm.providers.gemini import GeminiProvider
@@ -104,6 +107,65 @@ async def test_bedrock_throttling_is_transient():
     assert e.value.transient
 
 
+def claude(response: httpx2.Response, effort: str = "low"):
+    """A real SDK client whose HTTP layer is mocked, so the test checks what the SDK actually sends."""
+    seen: dict = {}
+
+    def handler(req: httpx2.Request) -> httpx2.Response:
+        seen.update(url=str(req.url), headers=dict(req.headers), body=json.loads(req.content))
+        return response
+
+    client = anthropic.AsyncAnthropic(
+        api_key="ak-test", max_retries=0, http_client=anthropic.DefaultAsyncHttpxClient(transport=httpx2.MockTransport(handler))
+    )
+    return AnthropicProvider("ak-test", "claude-opus-5-5", effort, client=client), seen
+
+
+def claude_message(content: list, stop_reason: str = "end_turn", **extra) -> dict:
+    return {
+        "id": "msg_1",
+        "type": "message",
+        "role": "assistant",
+        "model": "claude-opus-5-5",
+        "content": content,
+        "stop_reason": stop_reason,
+        "usage": {"input_tokens": 21, "output_tokens": 8},
+        **extra,
+    }
+
+
+async def test_anthropic_request_shape_and_parsing():
+    body = claude_message([{"type": "thinking", "thinking": "", "signature": "s"}, {"type": "text", "text": '{"c":3}'}])
+    p, seen = claude(httpx2.Response(200, json=body), effort="medium")
+    comp = await p.complete(REQ, timeout_s=5)
+    assert seen["url"] == "https://api.anthropic.com/v1/messages"
+    assert "ak-test" in (seen["headers"].get("x-api-key"), seen["headers"].get("authorization", "").removeprefix("Bearer "))
+    assert "server-side-fallback-2026-07-01" in seen["headers"]["anthropic-beta"]
+    b = seen["body"]
+    assert b["model"] == "claude-opus-5-5" and b["system"] == "SYS" and b["messages"] == [{"role": "user", "content": "USER"}]
+    assert b["output_config"] == {"effort": "medium"} and b["fallbacks"] == "default"
+    assert b["max_tokens"] == 16000  # raised: thinking tokens count against max_tokens
+    assert "temperature" not in b  # current Claude models reject sampling parameters
+    assert (comp.text, comp.input_tokens, comp.output_tokens) == ('{"c":3}', 21, 8)  # thinking block ignored
+
+
+async def test_anthropic_refusal_is_a_clear_error():
+    body = claude_message([], stop_reason="refusal", stop_details={"type": "refusal", "category": "cyber", "explanation": "x"})
+    p, _ = claude(httpx2.Response(200, json=body))
+    with pytest.raises(LLMError, match="refusal, category=cyber") as e:
+        await p.complete(REQ, timeout_s=5)
+    assert not e.value.transient
+
+
+@pytest.mark.parametrize("status,transient", [(429, True), (529, True), (500, True), (400, False), (401, False)])
+async def test_anthropic_status_to_transient_mapping(status, transient):
+    err = {"type": "error", "error": {"type": "api_error", "message": "err"}}
+    p, _ = claude(httpx2.Response(status, json=err))
+    with pytest.raises(LLMError) as e:
+        await p.complete(REQ, timeout_s=5)
+    assert e.value.transient is transient and e.value.provider == "anthropic"
+
+
 @pytest.mark.parametrize("status,transient", [(429, True), (500, True), (503, True), (400, False), (401, False)])
 async def test_http_status_to_transient_mapping(status, transient):
     t, _ = capture(httpx.Response(status, text="err"))
@@ -133,6 +195,8 @@ def test_factory_honours_order_and_credentials():
         Settings(azure_openai_endpoint="https://a", azure_openai_api_key="k", azure_openai_deployment="d", bedrock_enabled=True)
     )
     assert {p.name for p in full if p.configured()} == {"azure", "bedrock", "offline"}
+    claude_first = build_providers(Settings(anthropic_api_key="ak", openai_api_key="x"))
+    assert [p.name for p in claude_first if p.configured()] == ["anthropic", "openai", "offline"]  # Claude leads by default
 
 
 async def test_offline_provider_rejects_unknown_tasks():

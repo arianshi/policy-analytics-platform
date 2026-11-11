@@ -2,6 +2,9 @@
 verify against each vendor's current price sheet before relying on them for billing."""
 
 PRICES: dict[str, tuple[float, float]] = {
+    "claude-opus-5-5": (4.00, 20.00),
+    "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-haiku-5-5": (0.10, 0.50),
     "gpt-4o-mini": (0.15, 0.60),
     "gpt-4o": (2.50, 10.00),
     "gemini-2.0-flash": (0.10, 0.40),

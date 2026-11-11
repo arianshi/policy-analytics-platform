@@ -28,6 +28,7 @@ def settings(tmp_path: Path) -> Settings:
         llm_provider_order="offline",
         http_backoff_s=0.0,
         rate_limit_per_min=0,
+        anthropic_api_key="",
         openai_api_key="",
         gemini_api_key="",
         azure_openai_api_key="",

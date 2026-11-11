@@ -30,18 +30,22 @@ class Settings(BaseSettings):
 
     # --- LLM providers -----------------------------------------------------
     # Tried in order; providers without credentials are skipped. "offline" is always last.
-    llm_provider_order: str = "openai,gemini,bedrock,azure,offline"
+    llm_provider_order: str = "anthropic,openai,gemini,bedrock,azure,offline"
     llm_timeout_s: float = 45.0
     llm_max_retries: int = 1
     llm_breaker_threshold: int = 3  # consecutive failures before a provider is skipped...
     llm_breaker_cooldown_s: float = 60.0  # ...for this long
+
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-opus-5-5"
+    anthropic_effort: str = "low"  # low | medium | high | xhigh | max - each agent step is a small, structured decision
 
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     openai_base_url: str = "https://api.openai.com/v1"
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-3.8-flash"
     gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
 
     azure_openai_endpoint: str = ""

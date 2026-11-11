@@ -175,4 +175,10 @@ class CoordinatorAgent(ReActAgent):
         res = await super().run()
         if res.status == "incomplete" and not self.ctx.report and not self.ctx.clarification:
             res.status = "failed"
+        # Whether a finished run is 'completed' or 'degraded' is a fact about the stages, not the model's wording: a live
+        # LLM answered {"status": "complete"} on a clean run, which would otherwise be mislabelled 'degraded'.
+        if self.ctx.report and res.final.get("status") not in ("failed", "needs_clarification"):
+            evidence = self.policy(self.state())
+            if "final" in evidence:
+                res.final["status"] = res.status = evidence["final"]["status"]
         return res

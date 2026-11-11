@@ -201,6 +201,21 @@ async def test_workflow_survives_an_llm_that_returns_garbage_for_everything(sett
     assert r["status"] == "completed" and r["verification"]["passed"]
 
 
+@pytest.mark.parametrize("word", ["complete", "done", "success"])
+async def test_final_status_comes_from_the_evidence_not_the_models_wording(settings, word):
+    """A real LLM finished a clean run with {"status": "complete"}, which was mislabelled 'degraded'."""
+    from app.llm.providers.offline import OfflineProvider
+
+    def model(req):
+        if "coordinator agent" in req.system and '"reporting": {' in req.prompt:
+            return json.dumps({"thought": "All stages finished.", "final": {"status": word}})
+        return "not json"  # every other step falls through to the offline model
+
+    ctx = make_ctx(settings, providers=[ScriptedProvider("wordy", model), OfflineProvider()])
+    r = await run_analysis(ctx)
+    assert r["status"] == "completed"
+
+
 async def test_charts_are_well_formed(run_analysis_offline):
     _, r = await run_analysis_offline()
     ids = set()

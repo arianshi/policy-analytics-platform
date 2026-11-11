@@ -3,6 +3,7 @@ from __future__ import annotations
 import httpx
 
 from ..config import Settings
+from .providers.anthropic import AnthropicProvider
 from .providers.azure import AzureOpenAIProvider
 from .providers.base import LLMProvider
 from .providers.bedrock import BedrockProvider
@@ -14,6 +15,7 @@ from .providers.openai import OpenAIProvider
 def build_providers(s: Settings, *, transport: httpx.AsyncBaseTransport | None = None) -> list[LLMProvider]:
     """All known providers ordered by ``LLM_PROVIDER_ORDER``; unconfigured ones stay in the list but are skipped at call time."""
     available: dict[str, LLMProvider] = {
+        "anthropic": AnthropicProvider(s.anthropic_api_key, s.anthropic_model, s.anthropic_effort),
         "openai": OpenAIProvider(s.openai_api_key, s.openai_model, s.openai_base_url, transport),
         "gemini": GeminiProvider(s.gemini_api_key, s.gemini_model, s.gemini_base_url, transport),
         "bedrock": BedrockProvider(s.bedrock_enabled, s.bedrock_model_id, s.aws_region),
