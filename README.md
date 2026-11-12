@@ -17,7 +17,7 @@ an LLM can narrate the results but cannot invent them.
 | **Stack** | FastAPI + SQLite + pandas/scipy · Next.js 16 / React 19 / TypeScript / Recharts |
 | **Quality** | 226 backend tests (95 % coverage) · 31 frontend tests · hallucination, accuracy, consistency, data-quality and load tests |
 
-Documents: [ARCHITECTURE.md](ARCHITECTURE.md) · [DATABASE.md](DATABASE.md) · [TESTING.md](TESTING.md) · [DATA_SOURCES.md](DATA_SOURCES.md) · [INNOVATION.md](INNOVATION.md) (Section 2 answer)
+Documents: [ARCHITECTURE.md](ARCHITECTURE.md) · [WORKFLOW.md](WORKFLOW.md) · [DATABASE.md](DATABASE.md) · [TESTING.md](TESTING.md) · [DATA_SOURCES.md](DATA_SOURCES.md) · [INNOVATION.md](INNOVATION.md) (Section 2 answer)
 
 ## What it does
 
